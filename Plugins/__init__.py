@@ -3,7 +3,7 @@ import asyncio
 from pyrogram.errors import FloodWait
 from pyrogram.types import Message, InlineKeyboardButton as IKB, InlineKeyboardMarkup as IKM
 from config import TUTORIAL_LINK, AUTO_DELETE_TIME
-from .start import get_chats
+from .start import build
 
 async def tryer(func, *args, **kwargs):
     try:
