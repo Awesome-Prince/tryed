@@ -146,4 +146,6 @@ async def start(_, m):
 @Client.on_message(filters.command('start') & filters.private)
 async def start_func(_, m):
     user_id = m.from_user.id
-    if user_id in control_batch
+    if user_id in control_batch:  # Yeh line theek karna tha
+        # Yahan apna batch process code daalein
+        pass
