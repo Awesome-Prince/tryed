@@ -1,80 +1,74 @@
-import sys
 from pyrogram import Client, idle
-from config import *
+from config import Config
+import sys
 from resolve import ResolvePeer
 
-# Subscription Channels
-FSUB = [FSUB_1, FSUB_2]
+# List of forced subscription channels
+FSUB = [Config.FSUB1, Config.FSUB2]
 
-# --- Custom Client Class ---
 class ClientLike(Client):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     async def resolve_peer(self, id):
-        resolver = ResolvePeer(self)
-        return await resolver.resolve_peer(id)
+        obj = ResolvePeer(self)
+        return await obj.resolve_peer(id)
 
-# --- Initialize Clients ---
+# Initialize the main bot client
 app = ClientLike(
-    ':91:',
-    api_id=API_ID,
-    api_hash=API_HASH,
-    bot_token=BOT_TOKEN,
+    'bot1',
+    api_id=Config.API_ID,
+    api_hash=Config.API_HASH,
+    bot_token=Config.BOT_TOKEN1,
     plugins=dict(root='Plugins')
 )
 
+# Initialize the notifier bot client
 app1 = ClientLike(
-    ':91-1:',
-    api_id=API_ID,
-    api_hash=API_HASH,
-    bot_token=BOT_TOKEN_2,
+    'bot2',
+    api_id=Config.API_ID,
+    api_hash=Config.API_HASH,
+    bot_token=Config.BOT_TOKEN2,
     plugins=dict(root='Plugins1')
 )
 
-# --- Start Function ---
 async def start():
     await app.start()
     await app1.start()
-
-    # Helper function to check channel messaging
-    async def check_channel_messaging(client, channel_id, bot_name):
-        try:
-            message = await client.send_message(channel_id, '.')
-            await message.delete()
-        except Exception as e:
-            print(f"{bot_name} cannot send messages to channel ID {channel_id}.")
-            print(e)
-            return True
-        return False
-
-    # Validate messaging for required channels
     ret = False
-    channels = {
-        "DB Channel": DB_CHANNEL_ID,
-        "Backup DB Channel": DB_CHANNEL_2_ID,
-        "Auto Save Channel": AUTO_SAVE_CHANNEL_ID,
-        "Log Channel": LOG_CHANNEL_ID,
-    }
 
-    for name, channel_id in channels.items():
-        if channel_id:
-            ret |= await check_channel_messaging(app, channel_id, "Main Bot")
+    # Function to test message sending capability
+    async def test_message(client, channel_id, channel_name):
+        nonlocal ret
+        try:
+            m = await client.send_message(channel_id, '.')
+            await m.delete()
+        except Exception as e:
+            print(f'Bot cannot send message in {channel_name} channel. Error: {e}')
+            ret = True
 
-    # Check FSUB channels for both bots
+    await test_message(app, Config.DB_CHANNEL_ID, 'DB')
+    await test_message(app, Config.DB_CHANNEL2_ID, 'Backup DB')
+    await test_message(app, Config.AUTO_SAVE_CHANNEL_ID, 'Auto Save')
+
+    if Config.LOG_CHANNEL_ID:
+        await test_message(app, Config.LOG_CHANNEL_ID, 'LOG')
+
     for channel_id in FSUB:
-        ret |= await check_channel_messaging(app, channel_id, "Main Bot")
-        ret |= await check_channel_messaging(app1, channel_id, "Notifier Bot")
+        await test_message(app, channel_id, f'FSUB {channel_id}')
+        await test_message(app1, channel_id, f'Notifier Bot FSUB {channel_id}')
 
-    # Exit if any messaging check fails
     if ret:
         sys.exit()
 
-    # Display bot usernames
-    bot1 = await app.get_me()
-    bot2 = await app1.get_me()
-    print(f"@{bot1.username} started.")
-    print(f"@{bot2.username} started.")
+    # Print bot usernames
+    x = await app.get_me()
+    y = await app1.get_me()
+    print(f'@{x.username} started.')
+    print(f'@{y.username} started.')
 
-    # Keep the bot running
     await idle()
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(start())
