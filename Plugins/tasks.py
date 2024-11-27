@@ -1,4 +1,3 @@
-
 import asyncio
 from time import time
 from pyrogram.types import InlineKeyboardButton as IKB, InlineKeyboardMarkup as IKM
@@ -17,6 +16,8 @@ async def task():
     if AUTO_DELETE_TIME == 0:
         logging.info("Auto delete is disabled.")
         return
+
+    logging.info("Auto delete task started.")  # Task start log
 
     while True:
         try:
@@ -75,5 +76,9 @@ async def task():
 
         await asyncio.sleep(1)
 
-# Start the task asynchronously
-asyncio.create_task(task())
+# Task start function
+def start_task():
+    asyncio.create_task(task())
+
+# Start the task
+start_task()
