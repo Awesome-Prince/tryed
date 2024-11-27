@@ -1,22 +1,20 @@
-import os
 from main import start, app
+import os
 
-# Function to purge session files
-def purge_sessions():
+def purge_session_files():
+    """
+    Function to purge session files.
+    """
     print("Purging session files...")
-    try:
-        files_in_dir = os.listdir()  # Get all files in the current directory
-        for file in files_in_dir:
-            if file.endswith(".session") or file.endswith(".session-journal"):
-                os.remove(file)
-                print(f"Deleted: {file}")
-    except Exception as e:
-        print(f"Error purging session files: {e}")
+    for filename in os.listdir():
+        if filename.endswith(".session") or filename.endswith(".session-journal"):
+            os.remove(filename)
 
-# Purging session files and starting the bots
-purge_sessions()
+# Purge old session files
+purge_session_files()
+
 print("Starting Bots...")
+os.system('clear')
 
-# Clear terminal screen and run the bot
-os.system('clear')  # Use 'cls' for Windows if needed
+# Run the app with the start function
 app.run(start())
