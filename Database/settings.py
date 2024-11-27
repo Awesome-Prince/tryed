@@ -1,27 +1,40 @@
 from . import db
 
-db = db.settings
+# Reference to the settings collection in the database
+settings_collection = db.settings
 
-# Update settings with the given dictionary
-async def update_settings(dic):
-    try:
-        await db.update_one({'settings': 69}, {'$set': {'actual_settings': dic}}, upsert=True)
-    except Exception as e:
-        # Log the error (replace with your logging mechanism)
-        print(f"Error updating settings: {e}")
+# Default settings dictionary
+DEFAULT_SETTINGS = {
+    'auto_approval': False,
+    'join': False,
+    'leave': False,
+    'image': False,
+    'generate': 10,
+    'auto_save': False,
+    'logs': True
+}
 
-# Get current settings
+async def update_settings(settings_dict):
+    """
+    Update the settings in the database.
+
+    Args:
+        settings_dict (dict): Dictionary containing the settings to update.
+    """
+    await settings_collection.update_one(
+        {'settings': 69},
+        {'$set': {'actual_settings': settings_dict}},
+        upsert=True
+    )
+
 async def get_settings():
-    try:
-        x = await db.find_one({'settings': 69})
-        if x:
-            return x['actual_settings']
-        # Default settings if no record is found
-        return {'auto_approval': False, 'join': False, 'leave': False, 'image': False, 
-                'generate': 10, 'auto_save': False, 'logs': True}
-    except Exception as e:
-        # Log the error (replace with your logging mechanism)
-        print(f"Error retrieving settings: {e}")
-        # Return default settings if error occurs
-        return {'auto_approval': False, 'join': False, 'leave': False, 'image': False, 
-                'generate': 10, 'auto_save': False, 'logs': True}
+    """
+    Retrieve the settings from the database.
+
+    Returns:
+        dict: The settings dictionary from the database or the default settings.
+    """
+    settings = await settings_collection.find_one({'settings': 69})
+    if settings:
+        return settings.get('actual_settings', DEFAULT_SETTINGS)
+    return DEFAULT_SETTINGS
