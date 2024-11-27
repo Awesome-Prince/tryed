@@ -11,7 +11,8 @@ from main import app as paa, ClientLike
 import asyncio
 from Database.auto_delete_2 import update_2, get_all_2, get_2
 from templates import AUTO_DELETE_TEXT, POST_DELETE_TEXT, USELESS_MESSAGE
-from . import AUTO_DELETE_STR, tryer, build
+from helpers import tryer
+from . import AUTO_DELETE_STR, build
 from Database.count_2 import incr_count_2
 import time
 from config import USELESS_IMAGE
