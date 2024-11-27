@@ -21,6 +21,9 @@ LOG_CHANNEL_ID = int(getenv('LOG_CHANNEL_ID', '0')) or None  # None if no Log Ch
 # --- Timer Configuration ---
 AUTO_DELETE_TIME = int(getenv('AUTO_DELETE_TIME', '3600'))  # Time in seconds (0 disables auto-delete)
 
+# --- String to display auto delete time ---
+AUTO_DELETE_STR = f"Auto delete will happen in {AUTO_DELETE_TIME} seconds."
+
 # --- Subscription Channels ---
 FSUB_1 = int(getenv('FSUB_1', '-1002210532935'))
 FSUB_2 = int(getenv('FSUB_2', '-1002319501979'))
