@@ -7,7 +7,7 @@ from config import DB_CHANNEL_ID, AUTO_DELETE_TIME, FSUB_1, FSUB_2, DB_CHANNEL_2
 from time import time
 from Database.auto_delete import update, get
 from Database.privileges import get_privileges
-from . import AUTO_DELETE_STR, tryer
+from . import tryer
 from Database.users import add_user, is_user
 from templates import AUTO_DELETE_TEXT, START_MESSAGE, START_MESSAGE_2, TRY_AGAIN_TEXT
 from .block import block_dec
@@ -146,12 +146,4 @@ async def start(_, m):
 @Client.on_message(filters.command('start') & filters.private)
 async def start_func(_, m):
     user_id = m.from_user.id
-    if user_id in control_batch:
-        return
-    control_batch.append(user_id)
-    try:
-        await start(_, m)
-    except Exception as e:
-        logging.error(f"Error in start_func: {e}")
-    finally:
-        control_batch.remove(user_id) if user_id in control_batch else None
+    if user_id in control_batch
