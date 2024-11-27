@@ -1,18 +1,18 @@
-from config import SUDO_USERS, EXPIRY_TIME
+from config import SUDO_USERS, EXPIRY_TIME, CONNECT_TUTORIAL_LINK, SU_IMAGE
 from pyrogram import Client, filters
-from Database.privileges import *
+from Database.privileges import get_privileges, update_privileges
 from .tasks import IKM, IKB
 from templates import SU_TEXT, EXPIRE_TEXT
 import datetime
 from . import tryer
-from config import CONNECT_TUTORIAL_LINK, SU_IMAGE
 import asyncio
 from Database.subscription import get_all_subs, del_sub, active_sub
 from main import app
 import time
 
-exp = int(EXPIRY_TIME * 86400)
+exp = int(EXPIRY_TIME * 86400)  # Convert expiry time to seconds
 
+# Build inline markup for privileges and activation/deactivation buttons
 def build_markup_2(lis, user_id, activate=True):
     return IKM(
         [
@@ -24,14 +24,17 @@ def build_markup_2(lis, user_id, activate=True):
         ]
     )
 
+# Command to manage user privileges and activation
 @Client.on_message(filters.command("super") & filters.user(SUDO_USERS) & filters.private)
 async def pay_settings(_, m):
     try:
         id = int(m.text.split()[1])
     except:
         return await m.reply("**Usage:** `/super [ID]`")
+    
     priv = await get_privileges(id)
     subs = await get_all_subs()
+
     if id in subs:
         sec = int(time.time() - subs[id])
         sec = exp - sec
@@ -40,21 +43,26 @@ async def pay_settings(_, m):
     else:
         await m.reply(f"**Before Activate Give Access..**", reply_markup=build_markup_2(priv, id))
 
+# Activation or deactivation callback
 me = None
 async def activate_cbq(_, q):
     global me
     if not me:
         me = await _.get_me()
+    
     id = int(q.data.split("_")[1])
     priv = await get_privileges(id)
     subs = await get_all_subs()
-    if not id in subs:
+
+    if id not in subs:
         act = True if True in priv else False
         if not act:
             return await q.answer("Atleast one privilege should be up to activate.", show_alert=True)
+        
         markup = None
         if priv[1]:
             markup = IKM([[IKB("𝘊𝘰𝘯𝘯𝘦𝘤𝘵", callback_data='connect'), IKB("𝘛𝘶𝘵𝘰𝘳𝘪𝘢𝘭", url=CONNECT_TUTORIAL_LINK)]])
+        
         await active_sub(id)
         tar = datetime.datetime.now() + datetime.timedelta(seconds=exp)
         await tryer(_.send_photo, id, SU_IMAGE, caption=SU_TEXT.format((await _.get_users(id)).mention, f'{tar.day}-{tar.month}-{tar.year}'), reply_markup=markup)
@@ -64,16 +72,19 @@ async def activate_cbq(_, q):
         deact = False if True in priv else True
         if not deact:
             return await q.answer("Disable all privileges to deactivate.", show_alert=True)
+        
         await del_sub(id)
         markup = IKM([[IKB('𝘛𝘢𝘭𝘬 𝘛𝘰 𝘈𝘥𝘮𝘪𝘯', url='https://t.me/CuteGirlTG?text=%2A%2A%20I%20saw%20my%20subscription%20is%20stopped%20by%20admin%20but%20why%3F%20%2A%2A')]])
         await tryer(_.send_message, id, '**Your MemeberShip Cancelled By Admin**', reply_markup=markup)
         await q.answer()
         await tryer(q.edit_message_text, 'Deactivated.', reply_markup=None)
 
+# Callback for toggling privileges
 async def pay_cbq(_, q):
     id = int(q.data.split("_")[1])
     priv = await get_privileges(id)
     sub = id in await get_all_subs()
+
     if q.data.startswith("toggleab"):
         priv[0] = not priv[0]
     elif q.data.startswith("togglesu"):
@@ -84,22 +95,26 @@ async def pay_cbq(_, q):
         priv[3] = not priv[3]
     elif q.data.startswith('activate'):
         return await activate_cbq(_, q)
+
     await update_privileges(id, priv[0], priv[1], priv[2], priv[3])
     await q.answer()
     await q.edit_message_reply_markup(reply_markup=build_markup_2(priv, id, activate=not sub)) 
 
+# Markup for renewal action
 renew = IKM([[IKB("𝘉𝘶𝘺 𝘈𝘨𝘢𝘪𝘯", url="https://t.me/CuteGirlTG?text=**Hii%20I%20Want%20To%20Renew%20My%20Membership...**")]])
 
+# Task to handle expired subscriptions
 async def task():
     while True:
         subs = await get_all_subs()
         for x in subs:
             if int(time.time() - subs[x]) >= exp:
                 await del_sub(x)
-                await update_privileges(x, False, False, False, False) 
+                await update_privileges(x, False, False, False, False)
                 mention = (await tryer(app.get_users, x)).mention
                 await tryer(app.send_photo, x, SU_IMAGE, caption=EXPIRE_TEXT.format(mention, mention), reply_markup=renew)
-        await asyncio.sleep(exp/1000)
         
+        await asyncio.sleep(exp / 1000)
+
+# Start the task to monitor subscriptions
 asyncio.create_task(task())
-                
