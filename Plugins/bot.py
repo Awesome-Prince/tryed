@@ -16,16 +16,10 @@ from Database.count_2 import incr_count_2
 import time
 from config import USELESS_IMAGE
 
-async def stop(c):
-    try:
-        await c.stop()
-    except ConnectionError:
-        pass
-
 TEMPL = '''┏━━━━━𓆩𝘌𝘳𝘳𝘰𝘳 𝘍𝘰𝘶𝘯𝘥𓆪ꪾ━━━━━┓
 ♛ 𝙃𝙚𝙮 𝙏𝙂 𝙐𝙨𝙚𝙧 : {}
 
-≼𝗪𝗔𝗥𝗡𝗜𝗡𝗚 𝗔𝗟𝗘𝗥𝗧≽
+≼𝗪𝗔𝗥𝗥𝗜𝗡𝗚 𝗔𝗟𝗘𝗥𝗧≽
 ➤**You are Not eligible To Save BOT 
 Content ....
 
@@ -37,28 +31,36 @@ markup = IKM([[IKB('𝘚𝘩𝘢𝘳𝘦 𝘞𝘪𝘵𝘩 𝘔𝘦', callback_da
 global_app = {}
 me = None
 bots = {}
+
 async def save(C, M):
     if not M.chat.id in bots:
         bots[M.chat.id] = (await tryer(C.get_users, M.chat.id)).is_bot
     global me
     if not me:
         me = await paa.get_me()
+
     priv = await get_privileges(M.from_user.id)
     if not priv[2]:
         if M.chat.id == me.id:
             return await paa.send_photo(M.from_user.id, WARN_IMAGE, caption=TEMPL.format(M.from_user.mention))
+
     dm = not bots[M.chat.id]
     if not priv[3]:
         if dm:
             return await tryer(M.delete)
+
+    # Parse count from message text
     try:
         count = int(M.text.split()[1])
-    except:
-        count = 1
+    except (IndexError, ValueError):
+        return await M.edit('Usage: Specify a valid number of messages to save (max 20).')
+    
     if count > 20:
         return await M.edit('Limit is 20.')
+
     if not M.reply_to_message:
         return await M.edit('Reply to a file to save.')
+
     settings = await get_settings()
     st = M.reply_to_message.id
     en = st + count
@@ -66,20 +68,18 @@ async def save(C, M):
     count = await incr_count_2()
     cops = []
     uffie = await tryer(paa.send_message, M.from_user.id, 'Under processing...')
+    
+    # Process each message
     for msg in messes:
-        if not msg or msg.empty:
+        if not msg or msg.empty or msg.from_user.id == M.from_user.id:
             continue 
-        if msg.from_user.id == M.from_user.id:
-            continue
+
         if msg.text:
             await uffie.delete()
             cop = await paa.send_message(M.from_user.id, msg.text, reply_markup=markup)
         else:
             if dm:
-                if not msg.caption:
-                    msg.caption = '#DM'
-                else:
-                    msg.caption = '#DM\n ' + msg.caption
+                msg.caption = msg.caption if msg.caption else '#DM'
             try:
                 dl = await msg.download()
                 await uffie.delete()
@@ -92,14 +92,19 @@ async def save(C, M):
                 elif msg.animation:
                     cop = await paa.send_animation(M.from_user.id, dl, caption=msg.caption, reply_markup=markup)
                 os.remove('downloads/' + dl.split('/')[-1])
-            except:
-                pass
+            except Exception as e:
+                print(f"Error while processing message: {e}")
+                continue
+        
+        # Auto-save the content if settings allow
         if settings['auto_save']:
             await cop.copy(AUTO_SAVE_CHANNEL_ID, reply_markup=None)
         cops.append(cop.id)
+
     ok = await paa.send_message(M.from_user.id, AUTO_DELETE_TEXT.format(AUTO_DELETE_STR))
     await update_2(M.from_user.id, [cops, ok.id, count, time.time()])
     
+    # Clean up if necessary
     # await stop(global_app[M.from_user.id])
 
 @Client.on_message(filters.command('bot'))
@@ -108,9 +113,11 @@ async def bot(_, m):
     priv = await get_privileges(id)
     if not priv[1]:
         return await tryer(m.reply_photo, USELESS_IMAGE, caption=USELESS_MESSAGE, reply_markup=await build(_))
+
     session = await get_session(id)
     if not session:
         return await m.reply("**Before Use.You Have to Connect with Bot.For Connect Use: /connect **")
+    
     try:
         app = ClientLike(str(id), api_id=API_ID, api_hash=API_HASH, session_string=session)
         await app.start()
@@ -120,14 +127,15 @@ async def bot(_, m):
         await asyncio.sleep(300)
         try:
             await app.stop()
-            await tryer(m.reply, '**UBot Deactivate..**')
+            await tryer(m.reply, '**UBot Deactivated.**')
         except ConnectionError:
             pass
     except FloodWait as e:
         return await m.reply(f'Try Again After {e.value} seconds.')
-    except:
-        return await m.reply('Session Expired.')
-    
+    except Exception as e:
+        return await m.reply(f'Session Expired or Error: {e}')
+
+# Periodic task to delete old messages
 async def task():
     while True:
         x = await get_all_2()
@@ -140,9 +148,10 @@ async def task():
             await tryer(paa.delete_messages, y, lis[0])
             try:
                 await tryer(paa.edit_message_text, y, lis[1], POST_DELETE_TEXT.format(lis[2]))
-            except:
-                pass
+            except Exception as e:
+                print(f"Error while editing message: {e}")
             await update_2(y, [])
         await asyncio.sleep(10)
 
+# Start the periodic task
 asyncio.create_task(task())
