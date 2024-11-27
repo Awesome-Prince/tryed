@@ -1,15 +1,13 @@
+# helpers.py
 import asyncio
-from .helpers import tryer
+from pyrogram.errors import FloodWait
 
-# Retry logic for async operations
 async def tryer(func, *args, **kwargs):
-    retry_count = 3  # Number of retries
-    for attempt in range(retry_count):
-        try:
-            return await func(*args, **kwargs)
-        except Exception as e:
-            if attempt < retry_count - 1:
-                await asyncio.sleep(2)  # Wait before retrying
-                continue
-            else:
-                raise e  # If all retries fail, raise the error
+    try:
+        return await func(*args, **kwargs)
+    except FloodWait as e:
+        await asyncio.sleep(e.value)
+        return await func(*args, **kwargs)
+    except Exception as e:
+        print(f"Error occurred: {e}")
+        return None
