@@ -12,6 +12,7 @@ import logging
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 
+# Task function
 async def task():
     if AUTO_DELETE_TIME == 0:
         logging.info("Auto delete is disabled.")
@@ -21,10 +22,11 @@ async def task():
 
     while True:
         try:
+            # Fetch all records for auto-delete
             x = await get_all()
             if not x:
                 logging.info("No records found for auto-delete.")
-                await asyncio.sleep(5)  # Sleep for a while before retrying if no records exist
+                await asyncio.sleep(5)  # Sleep before retrying if no records exist
                 continue
 
             for i in x:
@@ -33,7 +35,7 @@ async def task():
                     logging.warning(f"No data found for chat {i}.")
                     continue
 
-                to_del = []
+                to_del = []  # List to keep track of the items to delete
                 for z in dic:
                     then = dic[z][1]
                     if int(time() - then) >= AUTO_DELETE_TIME:
@@ -43,10 +45,13 @@ async def task():
 
                         # Extract count based on the link type
                         try:
-                            if 'get' in dic[z][2]:
-                                count = Char2Int(decrypt(dic[z][2].split('get')[1]).split('|')[1])
+                            link = dic[z][2]
+                            if 'get' in link:
+                                count = Char2Int(decrypt(link.split('get')[1]).split('|')[1])
+                            elif 'batch' in link:
+                                count = Char2Int(decrypt(link.split('batch')[1][3:]).split('|')[1])
                             else:
-                                count = Char2Int(decrypt(dic[z][2].split('batch')[1][3:]).split('|')[1])
+                                raise ValueError("Unexpected link format")
                         except Exception as e:
                             logging.error(f"Error while parsing the link for {z}: {e}")
                             continue
@@ -62,10 +67,11 @@ async def task():
                         except Exception as e:
                             logging.error(f"Error while processing message deletion or update for {z}: {e}")
 
-                # Remove the deleted entries
+                # Remove the deleted entries from the dictionary
                 for to_d in to_del:
                     del dic[to_d]
 
+                # Update the database with the remaining data
                 if dic:
                     await update(i, dic)
                 else:
@@ -74,7 +80,7 @@ async def task():
         except Exception as e:
             logging.error(f"Error in auto-delete task: {e}")
 
-        await asyncio.sleep(1)
+        await asyncio.sleep(1)  # Sleep before retrying the task
 
 # Task start function
 def start_task():
