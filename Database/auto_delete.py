@@ -1,30 +1,44 @@
 from . import db
 
-db = db.auto_delete  # Access the 'auto_delete' collection from the 'db' module
+# Reference to the auto_delete collection in the database
+auto_delete_collection = db.auto_delete
 
-# Function to update or insert a document for a given user_id
-async def update(user_id, dic):
-    try:
-        await db.update_one({'user_id': user_id}, {'$set': {'dic': dic}}, upsert=True)
-    except Exception as e:
-        print(f"Error in update: {e}")
+async def update(user_id: int, settings_dict: dict):
+    """
+    Update the auto-delete settings for a specific user.
 
-# Function to retrieve the 'dic' field of a user document by user_id
-async def get(user_id):
-    try:
-        x = await db.find_one({'user_id': user_id})
-        if x:
-            return x['dic']
-    except Exception as e:
-        print(f"Error in get: {e}")
-    return {}  # Return an empty dictionary if no document is found
+    Args:
+        user_id (int): The user's ID.
+        settings_dict (dict): Dictionary containing the settings to update.
+    """
+    await auto_delete_collection.update_one(
+        {'user_id': user_id},
+        {'$set': {'settings': settings_dict}},
+        upsert=True
+    )
 
-# Function to fetch all user_ids from the collection and return them as a list
+async def get(user_id: int) -> dict:
+    """
+    Retrieve the auto-delete settings for a specific user.
+
+    Args:
+        user_id (int): The user's ID.
+
+    Returns:
+        dict: The user's auto-delete settings or an empty dictionary if not found.
+    """
+    user_settings = await auto_delete_collection.find_one({'user_id': user_id})
+    if user_settings:
+        return user_settings.get('settings', {})
+    return {}
+
 async def get_all() -> list[int]:
-    try:
-        x = await db.find()  # Query to get all documents in the collection
-        x = await x.to_list(length=None)  # Convert the cursor to a list of documents
-        return [y['user_id'] for y in x]  # Extract and return the user_ids as a list
-    except Exception as e:
-        print(f"Error in get_all: {e}")
-    return []  # Return an empty list in case of error
+    """
+    Retrieve all user IDs from the auto-delete collection.
+
+    Returns:
+        list[int]: A list of user IDs.
+    """
+    users_cursor = auto_delete_collection.find()
+    users_list = await users_cursor.to_list(length=None)
+    return [user['user_id'] for user in users_list]
