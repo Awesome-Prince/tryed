@@ -1,51 +1,128 @@
-from config import BOT_TOKEN
 import requests
 import json
+from config import BOT_TOKEN
 
-base = f'https://api.telegram.org/bot{BOT_TOKEN}/'
+# --- Base API URL ---
+BASE_URL = f'https://api.telegram.org/bot{BOT_TOKEN}/'
 
-def getChatMember(chat_id, user_id):
-    url = base + f'getChatMember?chat_id={chat_id}&user_id={user_id}'
-    return requests.get(url).json()
+# --- Utility Function for API Requests ---
+def make_request(endpoint, params=None):
+    """
+    Utility function to make API requests to the Telegram Bot API.
+    Args:
+        endpoint (str): The API endpoint to call.
+        params (dict, optional): Parameters to include in the request.
+    Returns:
+        dict: JSON response from the API.
+    """
+    url = BASE_URL + endpoint
+    response = requests.get(url, params=params)
+    return response.json()
 
-def sendMessage(chat_id, text, reply_markup=None):
+# --- Telegram API Methods ---
+def get_chat_member(chat_id, user_id):
+    """
+    Get information about a member in a chat.
+    Args:
+        chat_id (int or str): The chat ID or username (e.g., @channelusername).
+        user_id (int): The user ID to query.
+    Returns:
+        dict: JSON response from the Telegram API.
+    """
+    return make_request('getChatMember', {'chat_id': chat_id, 'user_id': user_id})
+
+def send_message(chat_id, text, reply_markup=None):
+    """
+    Send a text message to a chat.
+    Args:
+        chat_id (int or str): The chat ID or username.
+        text (str): The message text.
+        reply_markup (dict, optional): Inline keyboard or reply keyboard.
+    Returns:
+        dict: JSON response from the Telegram API.
+    """
+    params = {'chat_id': chat_id, 'text': text}
     if reply_markup:
-        url = base + f'sendMessage?chat_id={chat_id}&text={text}&reply_markup={json.dumps(reply_markup)}'
-    else:
-        url = base + f'sendMessage?chat_id={chat_id}&text={text}'
-    return requests.get(url).json()
+        params['reply_markup'] = json.dumps(reply_markup)
+    return make_request('sendMessage', params)
 
-def editMessageText(chat_id, msg_id, text, reply_markup=None):
+def edit_message_text(chat_id, msg_id, text, reply_markup=None):
+    """
+    Edit the text of an existing message.
+    Args:
+        chat_id (int or str): The chat ID or username.
+        msg_id (int): The message ID to edit.
+        text (str): The new message text.
+        reply_markup (dict, optional): Inline keyboard or reply keyboard.
+    Returns:
+        dict: JSON response from the Telegram API.
+    """
+    params = {'chat_id': chat_id, 'message_id': msg_id, 'text': text}
     if reply_markup:
-        url = base + f'editMessageText?chat_id={chat_id}&message_id={msg_id}&text={text}&reply_markup={json.dumps(reply_markup)}'
-    else:
-        url = base + f'editMessageText?chat_id={chat_id}&message_id={msg_id}&text={text}'
-    return requests.get(url).json()
+        params['reply_markup'] = json.dumps(reply_markup)
+    return make_request('editMessageText', params)
 
-def deleteMessage(chat_id, msg_id):
-    url = base + f'deleteMessage?chat_id={chat_id}&message_id={msg_id}'
-    requests.get(url)
+def delete_message(chat_id, msg_id):
+    """
+    Delete a message in a chat.
+    Args:
+        chat_id (int or str): The chat ID or username.
+        msg_id (int): The message ID to delete.
+    """
+    make_request('deleteMessage', {'chat_id': chat_id, 'message_id': msg_id})
 
-def sendDocument(chat_id, file_id):
-    url = base + f'sendDocument?chat_id={chat_id}&document={file_id}'
-    return requests.get(url).json()
-    
-def sendVideo(chat_id, file_id):
-    url = base + f'sendVideo?chat_id={chat_id}&video={file_id}'
-    print(url)
-    return requests.get(url).json()
+def send_document(chat_id, file_id):
+    """
+    Send a document to a chat.
+    Args:
+        chat_id (int or str): The chat ID or username.
+        file_id (str): The file ID of the document.
+    Returns:
+        dict: JSON response from the Telegram API.
+    """
+    return make_request('sendDocument', {'chat_id': chat_id, 'document': file_id})
 
-def sendPhoto(chat_id, photo, caption=None, reply_markup=None):
-    url = base + f'sendPhoto?chat_id={chat_id}&photo={photo}'
+def send_video(chat_id, file_id):
+    """
+    Send a video to a chat.
+    Args:
+        chat_id (int or str): The chat ID or username.
+        file_id (str): The file ID of the video.
+    Returns:
+        dict: JSON response from the Telegram API.
+    """
+    return make_request('sendVideo', {'chat_id': chat_id, 'video': file_id})
+
+def send_photo(chat_id, photo, caption=None, reply_markup=None):
+    """
+    Send a photo to a chat.
+    Args:
+        chat_id (int or str): The chat ID or username.
+        photo (str): The URL or file ID of the photo.
+        caption (str, optional): Caption for the photo.
+        reply_markup (dict, optional): Inline keyboard or reply keyboard.
+    Returns:
+        dict: JSON response from the Telegram API.
+    """
+    params = {'chat_id': chat_id, 'photo': photo}
     if caption:
-        url += f'&caption={caption}'
+        params['caption'] = caption
     if reply_markup:
-        url += f'&reply_markup={json.dumps(reply_markup)}'
-    return requests.get(url).json()
+        params['reply_markup'] = json.dumps(reply_markup)
+    return make_request('sendPhoto', params)
 
-def editMessageCaption(chat_id, msg_id, caption, reply_markup=None):
+def edit_message_caption(chat_id, msg_id, caption, reply_markup=None):
+    """
+    Edit the caption of an existing message.
+    Args:
+        chat_id (int or str): The chat ID or username.
+        msg_id (int): The message ID to edit.
+        caption (str): The new caption.
+        reply_markup (dict, optional): Inline keyboard or reply keyboard.
+    Returns:
+        dict: JSON response from the Telegram API.
+    """
+    params = {'chat_id': chat_id, 'message_id': msg_id, 'caption': caption}
     if reply_markup:
-        url = base + f'editMessageCaption?chat_id={chat_id}&message_id={msg_id}&caption={caption}&reply_markup={json.dumps(reply_markup)}'
-    else:
-        url = base + f'editMessageCaption?chat_id={chat_id}&message_id={msg_id}&caption={caption}'
-    return requests.get(url).json()
+        params['reply_markup'] = json.dumps(reply_markup)
+    return make_request('editMessageCaption', params)
