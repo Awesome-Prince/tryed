@@ -1,4 +1,13 @@
+# List of dependencies for the project
+
+# Pyrogram: Telegram MTProto API Client Library and Framework
 pyrogram==2.0.100
+
+# TgCrypto: Optimized cryptography library for Telegram
 TgCrypto
+
+# Motor: The async driver for MongoDB
 motor
+
+# Requests: Simple, yet elegant HTTP library
 requests
