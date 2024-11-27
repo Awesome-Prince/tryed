@@ -3,8 +3,8 @@ from os import getenv
 # --- Basic Configuration ---
 API_ID = int(getenv('API_ID', '28982634'))
 API_HASH = getenv('API_HASH', 'b54ae7b2e6a8874f82c860ec22e2a3df')
-BOT_TOKEN = getenv('BOT_TOKEN', '6944717193:AAG4nhx08Ri61XnLIHhGS1dG1Ik5mlLeh5g')
-BOT_TOKEN_2 = getenv('BOT_TOKEN_2', '7208277760:AAGKBNndrcUIjl596wgcpi9SKfiiCOROy8Q')
+BOT_TOKEN = getenv('BOT_TOKEN', '7773860912:AAHo6aHZcV61VvaF_ymqY6_n7bneICOBbfo')
+BOT_TOKEN_2 = getenv('BOT_TOKEN_2', '8119715618:AAH-rYQ84LA-PdvCF90A1qSfILUQuzKTBo0')
 
 # --- User and Database Configuration ---
 SUDO_USERS = [int(x) for x in getenv('SUDO_USERS', '6604279354 6104594076').split()]  # Example: '1234 6789'
