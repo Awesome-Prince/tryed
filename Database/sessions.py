@@ -1,5 +1,6 @@
 from . import db
 
+# Select the collection for managing user sessions
 db = db.sessions
 
 async def update_session(user_id: int, session: str) -> None:
