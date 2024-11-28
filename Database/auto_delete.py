@@ -3,10 +3,9 @@ from time import time
 from pyrogram.types import InlineKeyboardButton as IKB, InlineKeyboardMarkup as IKM
 from config import AUTO_DELETE_TIME
 from main import app
-from .encode_decode import decrypt, Char2Int
+from .encr import decrypt, Char2Int
 from templates import POST_DELETE_TEXT
 from . import tryer
-import Database.auto_delete as auto_delete_module
 
 async def auto_delete_task():
     """
