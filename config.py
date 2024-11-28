@@ -1,5 +1,6 @@
 from os import getenv
 
+class Config:
 # Telegram API credentials
 API_ID = int(getenv('API_ID', '28982634'))
 API_HASH = getenv('API_HASH', 'b54ae7b2e6a8874f82c860ec22e2a3df')
