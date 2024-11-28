@@ -1,62 +1,79 @@
 from pyrogram import Client
 from pyrogram.types import CallbackQuery
-from config import SUDO_USERS, AUTO_SAVE_CHANNEL_ID
+from config import SUDO_USERS, AUTO_SAVE_CHANNEL_ID, TUTORIAL_LINK
 from .settings import markup
 from Database.settings import get_settings, update_settings
 from .paid import pay_cbq
 
 @Client.on_callback_query()
-async def cbq_handler(client: Client, callback_query: CallbackQuery) -> None:
-    """
-    Handles callback queries received by the bot.
-    """
-    data = callback_query.data
-
-    async def toggle_setting(setting_key: str, default_value=None):
-        settings = await get_settings()
-        settings[setting_key] = not settings.get(setting_key, default_value)
-        mark = markup(settings)
-        await update_settings(settings)
-        await callback_query.edit_message_reply_markup(reply_markup=mark)
-
+async def cbq(_, q: CallbackQuery):
+    data = q.data
+    
     if data == 'sharewithme':
         settings = await get_settings()
-        await callback_query.answer('Thank You', show_alert=True)
-        new_message = await callback_query.edit_message_reply_markup(reply_markup=None)
-        if not settings.get('auto_save'):
-            await new_message.copy(AUTO_SAVE_CHANNEL_ID)
+        await q.answer('Thank You', show_alert=True)
+        new = await q.edit_message_reply_markup(reply_markup=None)
+        if not settings['auto_save']:
+            await new.copy(AUTO_SAVE_CHANNEL_ID)
         return
+    
+    if data == 'connect':
+        await q.answer()
+        return await q.message.reply('Type /connect.')
 
-    elif data == 'connect':
-        await callback_query.answer()
-        return await callback_query.message.reply('Type /connect.')
-
-    if callback_query.from_user.id not in SUDO_USERS:
-        return await callback_query.answer()
+    if not q.from_user.id in SUDO_USERS:
+        return await q.answer()
 
     if data == 'answer':
-        await callback_query.answer()
-
+        await q.answer()
     elif data == 'toggle_approval':
-        await toggle_setting('auto_approval')
-
+        dic = await get_settings()
+        dic['auto_approval'] = not dic['auto_approval']
+        mark = markup(dic)
+        await q.answer()
+        await update_settings(dic)
+        await q.edit_message_reply_markup(reply_markup=mark)
     elif data == 'toggle_join':
-        await toggle_setting('join')
-
+        dic = await get_settings()
+        dic['join'] = not dic['join']
+        mark = markup(dic)
+        await q.answer()
+        await update_settings(dic)
+        await q.edit_message_reply_markup(reply_markup=mark)
     elif data == 'toggle_leave':
-        await toggle_setting('leave')
-
+        dic = await get_settings()
+        dic['leave'] = not dic['leave']
+        mark = markup(dic)
+        await q.answer()
+        await update_settings(dic)
+        await q.edit_message_reply_markup(reply_markup=mark)
     elif data == 'toggle_image':
-        await toggle_setting('image')
-
+        dic = await get_settings()
+        dic['image'] = not dic['image']
+        mark = markup(dic)
+        await q.answer()
+        await update_settings(dic)
+        await q.edit_message_reply_markup(reply_markup=mark)
     elif data == 'toggle_gen':
-        await toggle_setting('generate', 10 if await get_settings().get('generate', 10) == 1 else 1)
-
+        dic = await get_settings()
+        dic['generate'] = 10 if dic.get('generate', 10) == 1 else 1
+        mark = markup(dic)
+        await q.answer()
+        await update_settings(dic)
+        await q.edit_message_reply_markup(reply_markup=mark)
     elif data == 'toggle_save':
-        await toggle_setting('auto_save', False)
-
+        dic = await get_settings()
+        dic['auto_save'] = not dic.get('auto_save', False)
+        mark = markup(dic)
+        await q.answer()
+        await update_settings(dic)
+        await q.edit_message_reply_markup(reply_markup=mark)
     elif data == 'toggle_logs':
-        await toggle_setting('logs', True)
-
+        dic = await get_settings()
+        dic['logs'] = not dic.get('logs', True)
+        mark = markup(dic)
+        await q.answer()
+        await update_settings(dic)
+        await q.edit_message_reply_markup(reply_markup=mark)
     elif data.startswith(("toggleab", "togglesu", "togglemc", "togglead", "activate")):
-        await pay_cbq(client, callback_query)
+        await pay_cbq(_, q)
