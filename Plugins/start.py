@@ -137,22 +137,24 @@ async def start(client: Client, message: Message):
                 msg = await client.get_messages(DB_CHANNEL_2_ID, Char2Int(spl[2]))
             await std.delete()
             if not prem:
-                ok = await msg.copy(message.from_user.id, caption=None, reply_markup=None, protect_content=True)
-            else:
-                ok = await msg.copy(message.from_user.id, caption=None, reply_markup=None)
-            if AUTO_DELETE_TIME != 0:
-                ok1 = await ok.reply(AUTO_DELETE_TEXT.format(AUTO_DELETE_STR))
-                dic = await get(message.from_user.id)
-                dic[str(ok.id)] = [str(ok1.id), time(), f'https://t.me/{me.username}?start=get{encr}']
-                await update(message.from_user.id, dic)
-            return
-            
-            if command.startswith('batchone'):
-            encr = command[8:]
-            for chat in chats:
-                if not await check_fsub(user_id):
-                    mark = await markup(client, f'https://t.me/{me.username}?start=batchone{encr}')
-                    return await message.reply(TRY_AGAIN_TEXT.format(message.from_user.mention), reply_markup=mark)
+if protect_content:
+    ok = await msg.copy(message.from_user.id, caption=None, reply_markup=None, protect_content=True)
+else:
+    ok = await msg.copy(message.from_user.id, caption=None, reply_markup=None)
+
+if AUTO_DELETE_TIME != 0:
+    ok1 = await ok.reply(AUTO_DELETE_TEXT.format(AUTO_DELETE_STR))
+    dic = await get(message.from_user.id)
+    dic[str(ok.id)] = [str(ok1.id), time(), f'https://t.me/{me.username}?start=get{encr}']
+    await update(message.from_user.id, dic)
+return
+
+if command.startswith('batchone'):
+    encr = command[8:]
+    for chat in chats:
+        if not await check_fsub(user_id):
+            mark = await markup(client, f'https://t.me/{me.username}?start=batchone{encr}')
+            return await message.reply(TRY_AGAIN_TEXT.format(message.from_user.mention), reply_markup=mark)
             
             std = await message.reply_sticker(STICKER_ID)
             spl = decrypt(encr).split('|')[0].split('-')
