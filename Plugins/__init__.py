@@ -4,7 +4,7 @@ from pyrogram.errors import FloodWait
 from pyrogram.types import (
     Message, InlineKeyboardButton as IKB, InlineKeyboardMarkup as IKM
 )
-from config import TUTORIAL_LINK, AUTO_DELETE_TIME
+from config import Config  # Import the Config class from config.py
 from .start import get_chats
 
 # Helper function to retry a function call if it raises a FloodWait error
@@ -31,7 +31,7 @@ def alpha_grt(sec: int) -> str:
     return "60M+"
 
 # Constants
-AUTO_DELETE_STR = grt(AUTO_DELETE_TIME)
+AUTO_DELETE_STR = grt(Config.AUTO_DELETE_TIME)
 startTime = time()
 
 # Global variable for inline keyboard markup
@@ -60,7 +60,7 @@ async def build(_):
                     IKB("ʙᴀᴄᴋᴜᴘ ᴄʜᴀɴɴᴇʟ", url=chat_backup.invite_link)
                 ],
                 [
-                    IKB('ʜᴏᴡ ᴛᴏ ᴜsᴇ ᴛᴇʀᴀʙᴏx ʙᴏᴛ', url=TUTORIAL_LINK)
+                    IKB('ʜᴏᴡ ᴛᴏ ᴜsᴇ ᴛᴇʀᴀʙᴏx ʙᴏᴛ', url=Config.TUTORIAL_LINK)
                 ]
             ]
         )
