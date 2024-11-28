@@ -1,23 +1,17 @@
 from . import db
 
-# Select the collection for managing paid users
+# Accessing the paid collection
 db = db.paid
 
-async def pay(user_id: int) -> None:
-    """
-    Mark a user as paid by inserting their user ID into the paid collection.
-    """
+async def pay(user_id):
+    """Mark a user as paid by inserting user_id into the collection."""
     await db.insert_one({'user_id': user_id})
 
-async def unpay(user_id: int) -> None:
-    """
-    Unmark a user as paid by deleting their user ID from the paid collection.
-    """
+async def unpay(user_id):
+    """Unmark a user as paid by deleting user_id from the collection."""
     await db.delete_one({'user_id': user_id})
 
-async def is_paid(user_id: int) -> bool:
-    """
-    Check if a user is marked as paid by finding their user ID in the paid collection.
-    """
+async def is_paid(user_id):
+    """Check if a user is marked as paid."""
     user_data = await db.find_one({'user_id': user_id})
-    return bool(user_data)
+    return user_data is not None
