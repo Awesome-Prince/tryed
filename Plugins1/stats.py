@@ -5,18 +5,18 @@ from Plugins import startTime, grt
 from time import time
 
 @Client.on_message(filters.command('users') & filters.user(SUDO_USERS))
-async def users(client: Client, message: Message):
+async def users(_, m):
     """
-    Command to get the total count of users.
+    Handles the /users command to display the total number of users.
     """
     count = await get_users_count_2()
-    await message.reply(f'Users: {count}.')
+    await m.reply(f'Users: {count}.')
 
 @Client.on_message(filters.command('uptime') & filters.user(SUDO_USERS))
-async def uptime(client: Client, message: Message):
+async def uptime(_, m):
     """
-    Command to get the bot's uptime.
+    Handles the /uptime command to display the bot's uptime.
     """
     uptime_duration = int(time() - startTime)
-    txt = f'Uptime: {grt(uptime_duration)}.'
-    await message.reply(txt)
+    formatted_uptime = grt(uptime_duration)
+    await m.reply(f'Uptime: {formatted_uptime}.')
