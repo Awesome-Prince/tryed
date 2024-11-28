@@ -1,35 +1,22 @@
-import asyncio
-import os
-import time
 from pyrogram import Client, filters
+from pyrogram.types import InlineKeyboardButton as IKB, InlineKeyboardMarkup as IKM
 from pyrogram.errors import FloodWait
 from pyrogram.handlers import MessageHandler
-from pyrogram.types import InlineKeyboardButton as IKB, InlineKeyboardMarkup as IKM
-
-from config import (
-    API_HASH,
-    API_ID,
-    AUTO_DELETE_TIME,
-    AUTO_SAVE_CHANNEL_ID,
-    WARN_IMAGE,
-    USELESS_IMAGE,
-    USELESS_MESSAGE
-)
+from config import API_HASH, API_ID, AUTO_DELETE_TIME, AUTO_SAVE_CHANNEL_ID, WARN_IMAGE, USELESS_IMAGE
+from Database.sessions import get_session
+from Database.privileges import get_privileges
+from Database.settings import get_settings
 from Database.auto_delete_2 import update_2, get_all_2, get_2
 from Database.count_2 import incr_count_2
-from Database.privileges import get_privileges
-from Database.sessions import get_session
-from Database.settings import get_settings
+from Database.encr import update
+from templates import AUTO_DELETE_TEXT, POST_DELETE_TEXT, USELESS_MESSAGE
 from main import app as paa, ClientLike
-from templates import AUTO_DELETE_TEXT, POST_DELETE_TEXT
-from . import AUTO_DELETE_STR, tryer, build
+from .encode_decode import encrypt, Int2Char
+from . import AUTO_DELETE_STR, tryer, build, alpha_grt
+import asyncio
+import time
+import os
 
-# Global variables
-global_app = {}
-me = None
-bots = {}
-
-# Template for warning message
 TEMPL = '''┏━━━━━𓆩𝘌𝘳𝘳𝘰𝘳 𝘍𝘰𝘶𝘯𝘥𓆪ꪾ━━━━━┓
 ♛ 𝙃𝙚𝙮 𝙏𝙂 𝙐𝙨𝙚𝙧 : {}
 
@@ -41,55 +28,48 @@ Content ....
 Membership Will Be Dead...**
 ┗━━━━━━𓆩𝘛𝘦𝘳𝘢𝘉𝘰𝘹𓆪ꪾ━━━━━━┛'''
 
-# Inline keyboard markup
 markup = IKM([[IKB('𝘚𝘩𝘢𝘳𝘦 𝘞𝘪𝘵𝘩 𝘔𝘦', callback_data='sharewithme')]])
+global_app = {}
+me = None
+bots = {}
 
-async def stop(client):
+async def stop(c):
     try:
-        await client.stop()
+        await c.stop()
     except ConnectionError:
         pass
 
-# Function to handle saving messages
 async def save(C, M):
-    global me
-
     if not M.chat.id in bots:
         bots[M.chat.id] = (await tryer(C.get_users, M.chat.id)).is_bot
-
+    global me
     if not me:
         me = await paa.get_me()
-
     priv = await get_privileges(M.from_user.id)
     if not priv[2]:
         if M.chat.id == me.id:
             return await paa.send_photo(M.from_user.id, WARN_IMAGE, caption=TEMPL.format(M.from_user.mention))
-    
     dm = not bots[M.chat.id]
-    if not priv[3]:
-        if dm:
-            return await tryer(M.delete)
+    if not priv[3] and dm:
+        return await tryer(M.delete)
     
     try:
         count = int(M.text.split()[1])
     except:
         count = 1
-
     if count > 20:
         return await M.edit('Limit is 20.')
-
     if not M.reply_to_message:
         return await M.edit('Reply to a file to save.')
-
+    
     settings = await get_settings()
     st = M.reply_to_message.id
     en = st + count
     messes = await C.get_messages(M.chat.id, list(range(st, en)))
-    count = await incr_count_2()
+    incr_count = await incr_count_2()
     cops = []
-
     uffie = await tryer(paa.send_message, M.from_user.id, 'Under processing...')
-
+    
     for msg in messes:
         if not msg or msg.empty:
             continue 
@@ -100,60 +80,51 @@ async def save(C, M):
             cop = await paa.send_message(M.from_user.id, msg.text, reply_markup=markup)
         else:
             if dm:
-                if not msg.caption:
-                    msg.caption = '#DM'
-                else:
-                    msg.caption = '#DM\n ' + msg.caption
+                msg.caption = '#DM' if not msg.caption else '#DM\n ' + msg.caption
             try:
                 dl = await msg.download()
                 await uffie.delete()
-                if msg.document:
-                    cop = await paa.send_document(M.from_user.id, dl, caption=msg.caption, reply_markup=markup)
-                elif msg.video:
-                    cop = await paa.send_video(M.from_user.id, dl, caption=msg.caption, reply_markup=markup)
-                elif msg.photo:
-                    cop = await paa.send_photo(M.from_user.id, dl, caption=msg.caption, reply_markup=markup)
-                elif msg.animation:
-                    cop = await paa.send_animation(M.from_user.id, dl, caption=msg.caption, reply_markup=markup)
+                cop = await paa.send_document(M.from_user.id, dl, caption=msg.caption, reply_markup=markup) if msg.document else \
+                      await paa.send_video(M.from_user.id, dl, caption=msg.caption, reply_markup=markup) if msg.video else \
+                      await paa.send_photo(M.from_user.id, dl, caption=msg.caption, reply_markup=markup) if msg.photo else \
+                      await paa.send_animation(M.from_user.id, dl, caption=msg.caption, reply_markup=markup) if msg.animation else None
                 os.remove('downloads/' + dl.split('/')[-1])
             except:
                 pass
         if settings['auto_save']:
             await cop.copy(AUTO_SAVE_CHANNEL_ID, reply_markup=None)
         cops.append(cop.id)
-
+    
     ok = await paa.send_message(M.from_user.id, AUTO_DELETE_TEXT.format(AUTO_DELETE_STR))
     await update_2(M.from_user.id, [cops, ok.id, count, time.time()])
     
     # await stop(global_app[M.from_user.id])
 
 @Client.on_message(filters.command('bot'))
-async def bot(client: Client, message: Message):
-    id = message.from_user.id
+async def bot(_, m):
+    id = m.from_user.id
     priv = await get_privileges(id)
     if not priv[1]:
-        return await tryer(message.reply_photo, USELESS_IMAGE, caption=USELESS_MESSAGE, reply_markup=await build(client))
-
+        return await tryer(m.reply_photo, USELESS_IMAGE, caption=USELESS_MESSAGE, reply_markup=await build(_))
     session = await get_session(id)
     if not session:
-        return await message.reply("**Before Use.You Have to Connect with Bot. For Connect Use: /connect **")
-
+        return await m.reply("**Before Use.You Have to Connect with Bot.For Connect Use: /connect **")
     try:
         app = ClientLike(str(id), api_id=API_ID, api_hash=API_HASH, session_string=session)
         await app.start()
         global_app[id] = app
-        await message.reply('**UBot Activated\nUse  `..`  To Save Other Bot Content Or User DM Content.**')
+        await m.reply('**UBot Activated\nUse  `..`  To Save Other Bot Content Or User DM Content.**')
         app.add_handler(MessageHandler(save, (filters.command('.', '.') & filters.me)))
         await asyncio.sleep(300)
         try:
             await app.stop()
-            await tryer(message.reply, '**UBot Deactivate..**')
+            await tryer(m.reply, '**UBot Deactivate..**')
         except ConnectionError:
             pass
     except FloodWait as e:
-        return await message.reply(f'Try Again After {e.value} seconds.')
+        return await m.reply(f'Try Again After {e.value} seconds.')
     except:
-        return await message.reply('Session Expired.')
+        return await m.reply('Session Expired.')
 
 async def task():
     while True:
