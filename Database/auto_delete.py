@@ -1,21 +1,50 @@
-from . import db
+import asyncio
+from time import time
+from pyrogram.types import InlineKeyboardButton as IKB, InlineKeyboardMarkup as IKM
+from Database.auto_delete import get, update, get_all
+from config import AUTO_DELETE_TIME
+from main import app
+from .encode_decode import decrypt, Char2Int
+from templates import POST_DELETE_TEXT
+from . import tryer
 
-# Accessing the auto_delete collection
-db = db.auto_delete
+async def auto_delete_task():
+    """
+    Task that automatically deletes messages after a specified time.
+    """
+    if AUTO_DELETE_TIME == 0:
+        return
 
-async def update(user_id, dic):
-    """Update or insert user data based on user_id."""
-    await db.update_one({'user_id': user_id}, {'$set': {'dic': dic}}, upsert=True)
+    while True:
+        users = await get_all()
+        for user_id in users:
+            user_settings = await get(user_id)
+            to_delete = []
+            for msg_id, msg_info in user_settings.items():
+                timestamp = msg_info[1]
+                if int(time() - timestamp) >= AUTO_DELETE_TIME:
+                    message_id_to_delete = int(msg_id)
+                    message_id_to_edit = int(msg_info[0])
+                    button = IKM([[IKB('ᴡᴀᴛᴄʜ ᴀɢᴀɪɴ', url=msg_info[2])]])
 
-async def get(user_id):
-    """Get user data based on user_id."""
-    user_data = await db.find_one({'user_id': user_id})
-    if user_data:
-        return user_data.get('dic', {})
-    return {}
+                    if 'get' in msg_info[2]:
+                        count = Char2Int(decrypt(msg_info[2].split('get')[1]).split('|')[1])
+                    else:
+                        count = Char2Int(decrypt(msg_info[2].split('batch')[1][3:]).split('|')[1])
 
-async def get_all() -> list[int]:
-    """Get all user_ids from the collection."""
-    all_users = db.find()
-    all_users_list = await all_users.to_list(length=None)
-    return [user['user_id'] for user in all_users_list]
+                    delete_text = POST_DELETE_TEXT.format(count)
+                    to_delete.append(msg_id)
+                    try:
+                        await tryer(app.delete_messages, user_id, message_id_to_delete)
+                        await tryer(app.edit_message_text, user_id, message_id_to_edit, delete_text, reply_markup=button)
+                    except Exception:
+                        pass
+
+            for msg_id in to_delete:
+                del user_settings[msg_id]
+
+            await update(user_id, user_settings)
+
+        await asyncio.sleep(1)
+
+asyncio.create_task(auto_delete_task())
