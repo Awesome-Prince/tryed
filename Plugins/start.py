@@ -216,3 +216,5 @@ async def start(client: Client, message: Message):
                     dic[str(ok.id)] = [str(ok1.id), time(), f'https://t.me/{me.username}?start=batchone{encr}']
                 await update(message.from_user.id, dic)
             if okkie:
+                await okkie.delete() 
+                
