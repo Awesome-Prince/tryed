@@ -1,12 +1,12 @@
 import asyncio
 from time import time
 from pyrogram.types import InlineKeyboardButton as IKB, InlineKeyboardMarkup as IKM
-from Database.auto_delete import get, update, get_all
 from config import AUTO_DELETE_TIME
 from main import app
 from .encode_decode import decrypt, Char2Int
 from templates import POST_DELETE_TEXT
 from . import tryer
+import Database.auto_delete as auto_delete_module
 
 async def auto_delete_task():
     """
@@ -16,9 +16,9 @@ async def auto_delete_task():
         return
 
     while True:
-        users = await get_all()
+        users = await auto_delete_module.get_all()
         for user_id in users:
-            user_settings = await get(user_id)
+            user_settings = await auto_delete_module.get(user_id)
             to_delete = []
             for msg_id, msg_info in user_settings.items():
                 timestamp = msg_info[1]
@@ -43,7 +43,7 @@ async def auto_delete_task():
             for msg_id in to_delete:
                 del user_settings[msg_id]
 
-            await update(user_id, user_settings)
+            await auto_delete_module.update(user_id, user_settings)
 
         await asyncio.sleep(1)
 
