@@ -6,8 +6,8 @@ db = db.encr
 async def update(encr, e):
     """Update or insert encryption data."""
     await db.update_one({"encr": encr}, {"$set": {"e": e}}, upsert=True)
-    
-async def get_encr(encr):
+
+async def get(encr):
     """Get encryption data based on encr value."""
     encr_data = await db.find_one({"encr": encr})
     if encr_data:
