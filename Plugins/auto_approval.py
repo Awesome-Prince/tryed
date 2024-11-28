@@ -1,6 +1,7 @@
 from pyrogram import Client, filters
 from config import FSUB
 from Database.settings import get_settings
+from .utils import tryer  # Assuming `tryer` function is defined in utils
 
 @Client.on_chat_join_request(filters.chat(FSUB))
 async def cjr(client: Client, request):
@@ -12,10 +13,7 @@ async def cjr(client: Client, request):
         return
 
     # Approve the chat join request
-    await client.approve_chat_join_request(
-        request.chat.id,
-        request.from_user.id
-    )
-    
+    await tryer(client.approve_chat_join_request, request.chat.id, request.from_user.id)
+
     # Send a welcome message to the user
-    await client.send_message(request.from_user.id, "Hi")
+    await tryer(client.send_message, request.from_user.id, "Hi")
