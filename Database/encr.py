@@ -14,6 +14,10 @@ async def get_encr(encr):
         return encr_data["e"]
     return None
 
+async def get_all():
+    """Get all encryption data."""
+    return await db.find().to_list(None)
+
 def decrypt(text):
     # Add your decryption logic here
     pass
