@@ -10,11 +10,14 @@ from .join_leave import get_chats
 FSUB = [FSUB_1, FSUB_2]
 
 @Client.on_chat_join_request(filters.chat(FSUB_1))
-async def cjr(client: Client, join_request: ChatJoinRequest):
+async def cjr(_: Client, r):
     """
-    Approve chat join request and send a welcome message.
+    Handle chat join requests and approve them if auto_approval is enabled.
     """
-    link = (await get_chats(client))[1].invite_link
+    # Get invite link for the backup channel
+    link = (await get_chats(_))[1].invite_link
+
+    # Create markup for the welcome message
     markup = IKM(
       [
         [
@@ -26,20 +29,29 @@ async def cjr(client: Client, join_request: ChatJoinRequest):
         ]
       ]
     )
+
     settings = await get_settings()
+
+    # If auto_approval is disabled, return
     if not settings['auto_approval']:
         return
-    await client.approve_chat_join_request(
-        join_request.chat.id,
-        join_request.from_user.id
+
+    # Approve the chat join request
+    await _.approve_chat_join_request(
+        r.chat.id,
+        r.from_user.id
     )
+
+    # If sending join messages is disabled, return
     if not settings["join"]:
         return
+
+    # Send welcome message
     try:
         if JOIN_IMAGE:
-            await client.send_photo(join_request.from_user.id, JOIN_IMAGE, caption=JOIN_MESSAGE.format(join_request.from_user.mention), reply_markup=markup)
+            await _.send_photo(r.from_user.id, JOIN_IMAGE, caption=JOIN_MESSAGE.format(r.from_user.mention), reply_markup=markup)
         else:
-            await client.send_message(join_request.from_user.id, JOIN_MESSAGE.format(join_request.from_user.mention), reply_markup=markup)
-        await add_user_2(join_request.from_user.id)
+            await _.send_message(r.from_user.id, JOIN_MESSAGE.format(r.from_user.mention), reply_markup=markup)
+        await add_user_2(r.from_user.id)
     except Exception as e:
-        print(e)
+        print(f"Failed to send join message: {e}")
