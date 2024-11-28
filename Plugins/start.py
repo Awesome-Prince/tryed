@@ -146,7 +146,8 @@ async def start(client: Client, message: Message):
                 dic[str(ok.id)] = [str(ok1.id), time(), f'https://t.me/{me.username}?start=get{encr}']
                 await update(message.from_user.id, dic)
             return
-            elif command.startswith('batchone'):
+            
+            if command.startswith('batchone'):
             encr = command[8:]
             for chat in chats:
                 if not await check_fsub(user_id):
