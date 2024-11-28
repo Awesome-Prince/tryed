@@ -5,72 +5,58 @@ from .settings import markup
 from Database.settings import get_settings, update_settings
 from .paid import pay_cbq
 
-async def toggle_setting(setting: str, current_value: bool) -> bool:
-    """Toggle a given setting value (True/False)."""
-    new_value = not current_value
-    dic = await get_settings()
-    dic[setting] = new_value
-    await update_settings(dic)
-    return new_value
-
 @Client.on_callback_query()
-async def cbq(_, q: CallbackQuery):
-    data = q.data
+async def cbq_handler(client: Client, callback_query: CallbackQuery) -> None:
+    """
+    Handles callback queries received by the bot.
+    """
+    data = callback_query.data
+
+    async def toggle_setting(setting_key: str, default_value=None):
+        settings = await get_settings()
+        settings[setting_key] = not settings.get(setting_key, default_value)
+        mark = markup(settings)
+        await update_settings(settings)
+        await callback_query.edit_message_reply_markup(reply_markup=mark)
+
     if data == 'sharewithme':
         settings = await get_settings()
-        await q.answer('Thank You', show_alert=True)
-        new = await q.edit_message_reply_markup(reply_markup=None)
-        if not settings['auto_save']:
-            await new.copy(AUTO_SAVE_CHANNEL_ID)
+        await callback_query.answer('Thank You', show_alert=True)
+        new_message = await callback_query.edit_message_reply_markup(reply_markup=None)
+        if not settings.get('auto_save'):
+            await new_message.copy(AUTO_SAVE_CHANNEL_ID)
         return
+
     elif data == 'connect':
-        await q.answer()
-        return await q.message.reply('Type /connect.')
-    
-    if not q.from_user.id in SUDO_USERS:
-        return await q.answer()
+        await callback_query.answer()
+        return await callback_query.message.reply('Type /connect.')
+
+    if callback_query.from_user.id not in SUDO_USERS:
+        return await callback_query.answer()
 
     if data == 'answer':
-        await q.answer()
-    
-    # Settings toggles (Refactored to use toggle_setting function)
-    elif data == 'toggle_approval':
-        new_value = await toggle_setting('auto_approval', (await get_settings())['auto_approval'])
-        await q.answer()
-        await q.edit_message_reply_markup(reply_markup=markup(await get_settings()))
-    
-    elif data == 'toggle_join':
-        new_value = await toggle_setting('join', (await get_settings())['join'])
-        await q.answer()
-        await q.edit_message_reply_markup(reply_markup=markup(await get_settings()))
-    
-    elif data == 'toggle_leave':
-        new_value = await toggle_setting('leave', (await get_settings())['leave'])
-        await q.answer()
-        await q.edit_message_reply_markup(reply_markup=markup(await get_settings()))
-    
-    elif data == 'toggle_image':
-        new_value = await toggle_setting('image', (await get_settings())['image'])
-        await q.answer()
-        await q.edit_message_reply_markup(reply_markup=markup(await get_settings()))
-    
-    elif data == 'toggle_gen':
-        dic = await get_settings()
-        dic['generate'] = 10 if dic.get('generate', 10) == 1 else 1
-        await update_settings(dic)
-        await q.answer()
-        await q.edit_message_reply_markup(reply_markup=markup(dic))
-    
-    elif data == "toggle_save":
-        new_value = await toggle_setting('auto_save', (await get_settings()).get('auto_save', False))
-        await q.answer()
-        await q.edit_message_reply_markup(reply_markup=markup(await get_settings()))
-    
-    elif data == "toggle_logs":
-        new_value = await toggle_setting('logs', (await get_settings()).get('logs', True))
-        await q.answer()
-        await q.edit_message_reply_markup(reply_markup=markup(await get_settings()))
+        await callback_query.answer()
 
-    # For activating features like ab, su, mc, ad, or activating paid users
+    elif data == 'toggle_approval':
+        await toggle_setting('auto_approval')
+
+    elif data == 'toggle_join':
+        await toggle_setting('join')
+
+    elif data == 'toggle_leave':
+        await toggle_setting('leave')
+
+    elif data == 'toggle_image':
+        await toggle_setting('image')
+
+    elif data == 'toggle_gen':
+        await toggle_setting('generate', 10 if await get_settings().get('generate', 10) == 1 else 1)
+
+    elif data == 'toggle_save':
+        await toggle_setting('auto_save', False)
+
+    elif data == 'toggle_logs':
+        await toggle_setting('logs', True)
+
     elif data.startswith(("toggleab", "togglesu", "togglemc", "togglead", "activate")):
-        await pay_cbq(_, q)
+        await pay_cbq(client, callback_query)
