@@ -1,46 +1,63 @@
-import os
+from os import getenv
 
-class Config:
-    # Bot tokens
-    API_ID = int(os.getenv('API_ID', '28982634'))
-    API_HASH = os.getenv('API_HASH', 'b54ae7b2e6a8874f82c860ec22e2a3df')
-    BOT_TOKEN1 = os.getenv('BOT_TOKEN1', '6944717193:AAG4nhx08Ri61XnLIHhGS1dG1Ik5mlLeh5g')
-    BOT_TOKEN2 = os.getenv('BOT_TOKEN2', '7208277760:AAGKBNndrcUIjl596wgcpi9SKfiiCOROy8Q')
+# Telegram API credentials
+API_ID = int(getenv('API_ID', '28982634'))
+API_HASH = getenv('API_HASH', 'b54ae7b2e6a8874f82c860ec22e2a3df')
 
-    # Users and Database
-    SUDO_USERS = [int(x) for x in os.getenv('SUDO_USERS', '6604279354 6104594076').split()]
-    MONGO_DB_URI = os.getenv('MONGO_DB_URI', 'mongodb+srv://Manik:manik11@cluster0.xtzuh.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
-    
-    # Channels and Logging
-    DB_CHANNEL_ID = int(os.getenv('DB_CHANNEL_ID', '-1002230637444'))
-    DB_CHANNEL2_ID = int(os.getenv('DB_CHANNEL2_ID', '-1002296508906'))
-    LOG_CHANNEL_ID = int(os.getenv('LOG_CHANNEL_ID', '-1002462410192')) if os.getenv('LOG_CHANNEL_ID') else None
+# Bot tokens
+BOT_TOKEN = getenv('BOT_TOKEN', '6944717193:AAG4nhx08Ri61XnLIHhGS1dG1Ik5mlLeh5g')
+BOT_TOKEN_2 = getenv('BOT_TOKEN_2', '7208277760:AAGKBNndrcUIjl596wgcpi9SKfiiCOROy8Q')
 
-    # Auto delete settings
-    AUTO_DELETE_TIME = int(os.getenv('AUTO_DELETE_TIME', '3600'))  # Time in seconds, 0 to disable.
+# SUDO Users
+SUDO_USERS = getenv('SUDO_USERS', '6604279354 6104594076') # Example: '1234 6789'
+SUDO_USERS = [int(x) for x in SUDO_USERS.split()]
 
-    # Subscription and links
-    FSUB1 = int(os.getenv('FSUB1', '-1002210532935'))
-    FSUB2 = int(os.getenv('FSUB2', '-1002319501979'))
-    MUST_VISIT_LINK = os.getenv('MUST_VISIT_LINK', "https://t.me/Ultra_XYZ/14")
-    LINK_GENERATE_IMAGE = os.getenv('LINK_GENERATE_IMAGE', 'https://graph.org/file/a1cce5b8533180c2f0029.jpg')
-    TUTORIAL_LINK = os.getenv('TUTORIAL_LINK', 'https://t.me/Ultra_XYZ/16')
-    CONNECT_TUTORIAL_LINK = os.getenv('CONNECT_TUTORIAL_LINK', 'https://t.me/Terabox_Sharing_Bot?start=batchoneaWZkYS1pZmRjfGhoZg==')
+# MongoDB URI
+MONGO_DB_URI = getenv('MONGO_DB_URI', 'mongodb+srv://Manik:manik11@cluster0.xtzuh.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
 
-    # Images and messages
-    SU_IMAGE = os.getenv('SU_IMAGE', 'https://graph.org/file/2342d37844afd1b9b96c0.jpg')
-    JOIN_MESSAGE = os.getenv('JOIN_MESSAGE', 'You Joined.')
-    JOIN_IMAGE = os.getenv('JOIN_IMAGE', 'https://graph.org/file/015fddf0dbeb03b639647.jpg')
-    LEAVE_CAPTION = os.getenv('LEAVE_CAPTION', 'I Love You.')
-    USELESS_MESSAGE = os.getenv('USELESS_MESSAGE', 'This is useless text.')
-    USELESS_IMAGE = os.getenv('USELESS_IMAGE', 'https://graph.org/file/c579032c65d8353e43b0f.jpg')
+# Channel IDs
+DB_CHANNEL_ID = int(getenv('DB_CHANNEL_ID', '-1002230637444'))
+DB_CHANNEL_2_ID = int(getenv('DB_CHANNEL_2_ID', '-1002296508906'))
+LOG_CHANNEL_ID = getenv('LOG_CHANNEL_ID', '-1002462410192') # Keep it Empty if no Log Channel
+LOG_CHANNEL_ID = int(LOG_CHANNEL_ID) if LOG_CHANNEL_ID else None
 
-    # Stickers and content settings
-    STICKER_ID = os.getenv('STICKER_ID', 'CAACAgUAAxkBAAIiHWZjPezFGPWT_87VHnJUaschvGtrAAJtDgACYpoYV06rLlLA8dv_HgQ')
-    CONTENT_SAVER = bool(os.getenv('CONTENT_SAVER', True))
-    EXPIRY_TIME = int(os.getenv('EXPIRY_TIME', 30))  # In days
-    AUTO_SAVE_CHANNEL_ID = int(os.getenv('AUTO_SAVE_CHANNEL_ID', '-1002362025379'))
+# Auto delete time (in seconds)
+AUTO_DELETE_TIME = int(getenv('AUTO_DELETE_TIME', '3600')) # Enter time in seconds, keep it 0 for disabling
 
-    # Warning images
-    PHONE_NUMBER_IMAGE = os.getenv('PHONE_NUMBER_IMAGE', "https://graph.org/file/2821554b6b082eb8741dc.jpg")
-    WARN_IMAGE = os.getenv('WARN_IMAGE', 'https://graph.org/file/c86c68e014e471c1ce729.jpg')
+# Follow-up IDs
+FSUB_1 = -1002210532935
+FSUB_2 = -1002319501979
+
+# Important Links
+MUST_VISIT_LINK = "https://t.me/Ultra_XYZ/14"
+LINK_GENERATE_IMAGE = getenv('LINK_GENERATE_IMAGE', 'https://graph.org/file/a1cce5b8533180c2f0029.jpg')
+TUTORIAL_LINK = getenv('TUTORIAL_LINK', 'https://t.me/Ultra_XYZ/16')
+CONNECT_TUTORIAL_LINK = getenv('CONNECT_TUTORIAL_LINK', 'https://t.me/Terabox_Sharing_Bot?start=batchoneaWZkYS1pZmRjfGhoZg==')
+SU_IMAGE = "https://graph.org/file/2342d37844afd1b9b96c0.jpg"
+
+# Join Message and Image
+JOIN_MESSAGE = getenv('JOIN_MESSAGE', 'You Joined.')
+JOIN_IMAGE = getenv('JOIN_IMAGE', 'https://graph.org/file/015fddf0dbeb03b639647.jpg')
+
+# Leave Caption
+LEAVE_CAPTION = getenv('LEAVE_CAPTION', 'I Love You.')
+
+# Useless Message and Image
+USELESS_MESSAGE = getenv('USELESS_MESSAGE', 'This is useless text.')
+USELESS_IMAGE = getenv('USELESS_IMAGE', 'https://graph.org/file/c579032c65d8353e43b0f.jpg')
+
+# Sticker ID
+STICKER_ID = 'CAACAgUAAxkBAAIiHWZjPezFGPWT_87VHnJUaschvGtrAAJtDgACYpoYV06rLlLA8dv_HgQ'
+
+# Content Saver
+CONTENT_SAVER = True
+
+# Expiry Time in days
+EXPIRY_TIME = 30
+
+# Auto Save Channel ID
+AUTO_SAVE_CHANNEL_ID = -1002362025379
+
+# Images
+PHONE_NUMBER_IMAGE = "https://graph.org/file/2821554b6b082eb8741dc.jpg"
+WARN_IMAGE = 'https://graph.org/file/c86c68e014e471c1ce729.jpg'
