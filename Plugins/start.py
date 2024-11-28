@@ -112,17 +112,23 @@ async def start(client: Client, message: Message):
     """
     global me, chats
     if not me:
-        me = await client.get_me()
-    user_id = message.from_user.id
+        me = await client.get_me()  # Get bot details
+    user_id = message.from_user.id  # Get user ID
     chats = await get_chats(client)
+    
+    # Check if the user is new
     if not await is_user(user_id):
-        await add_user(user_id)
+        await add_user(user_id)  # Add the user to the database
         return await message.reply(START_MESSAGE.format(message.from_user.mention), reply_markup=await start_markup(client))
     
+    # Check privileges and handle different commands
     prem = (await get_privileges(user_id))[2] if CONTENT_SAVER else True
     txt = message.text.split()
+    
     if len(txt) > 1:
         command = txt[1]
+        
+        # Handle 'get' command
         if command.startswith('get'):
             encr = command[3:]
             for chat in chats:
@@ -136,11 +142,14 @@ async def start(client: Client, message: Message):
             if msg.empty:
                 msg = await client.get_messages(DB_CHANNEL_2_ID, Char2Int(spl[2]))
             await std.delete()
+            
+            # Send the message based on user privileges
             if not prem:
                 ok = await msg.copy(message.from_user.id, caption=None, reply_markup=None, protect_content=True)
             else:
                 ok = await msg.copy(message.from_user.id, caption=None, reply_markup=None)
 
+            # Handle auto-delete if enabled
             if AUTO_DELETE_TIME != 0:
                 ok1 = await ok.reply(AUTO_DELETE_TEXT.format(AUTO_DELETE_STR))
                 dic = await get(message.from_user.id)
@@ -148,6 +157,7 @@ async def start(client: Client, message: Message):
                 await update(message.from_user.id, dic)
             return
 
+        # Handle 'batchone' command
         elif command.startswith('batchone'):
             encr = command[8:]
             for chat in chats:
@@ -160,6 +170,8 @@ async def start(client: Client, message: Message):
             st = Char2Int(spl[0])
             en = Char2Int(spl[1])
             messes = [await client.get_messages(DB_CHANNEL_ID, st)] if st == en else []
+            
+            # Fetch and send the batch messages
             if not messes:
                 new_encr = await get_encr(encr)
                 if new_encr:
@@ -204,7 +216,3 @@ async def start(client: Client, message: Message):
                     dic[str(ok.id)] = [str(ok1.id), time(), f'https://t.me/{me.username}?start=batchone{encr}']
                 await update(message.from_user.id, dic)
             if okkie:
-                await okkie.delete()
-            return
-    else:
-        await message.reply(START_MESSAGE_2.format(message.from
