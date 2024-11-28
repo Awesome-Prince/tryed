@@ -7,18 +7,14 @@ from Database.users import get_users_2, del_user_2
 REPLY_ERROR = """<code>Use this command as a reply to any telegram message without any spaces.</code>"""
 
 @Client.on_message(filters.private & filters.command('bt') & filters.user(SUDO_USERS))
-async def send_text(client: Client, message: Message):
+async def send_text(client, message):
     """
-    Broadcast a message to all users in the database.
+    Handles the /bt command to broadcast a message to all users.
     """
     if message.reply_to_message:
         query = await get_users_2()
         broadcast_msg = message.reply_to_message
-        total = 0
-        successful = 0
-        blocked = 0
-        deleted = 0
-        unsuccessful = 0
+        total, successful, blocked, deleted, unsuccessful = 0, 0, 0, 0, 0
         
         pls_wait = await message.reply("<i>Broadcasting Message.. This will Take Some Time</i>")
         err = None
@@ -42,15 +38,7 @@ async def send_text(client: Client, message: Message):
                 pass
             total += 1
         
-        status = f"""<b><u>Broadcast Completed</u>
-
-Total Users: <code>{total}</code>
-Successful: <code>{successful}</code>
-Blocked Users: <code>{blocked}</code>
-Deleted Accounts: <code>{deleted}</code>
-Unsuccessful: <code>{unsuccessful}</code></b>
-
-Error: {err}"""
+        status = f"""<b><u>Broadcast Completed</u></b>\n\n<b>Total Users:</b> <code>{total}</code>\n<b>Successful:</b> <code>{successful}</code>\n<b>Blocked Users:</b> <code>{blocked}</code>\n<b>Deleted Accounts:</b> <code>{deleted}</code>\n<b>Unsuccessful:</b> <code>{unsuccessful}</code>\n\n<b>Error:</b> {err}"""
         
         return await pls_wait.edit(status)
 
