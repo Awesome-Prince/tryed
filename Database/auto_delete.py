@@ -15,9 +15,9 @@ async def auto_delete_task():
         return
 
     while True:
-        users = await auto_delete_module.get_all()
+        users = await get_all()
         for user_id in users:
-            user_settings = await auto_delete_module.get(user_id)
+            user_settings = await get(user_id)
             to_delete = []
             for msg_id, msg_info in user_settings.items():
                 timestamp = msg_info[1]
@@ -42,7 +42,7 @@ async def auto_delete_task():
             for msg_id in to_delete:
                 del user_settings[msg_id]
 
-            await auto_delete_module.update(user_id, user_settings)
+            await update(user_id, user_settings)
 
         await asyncio.sleep(1)
 
