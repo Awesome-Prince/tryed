@@ -1,4 +1,3 @@
-import asyncio
 from pyrogram import Client, filters
 from config import SUDO_USERS
 from Database.count import reset_count
@@ -7,30 +6,30 @@ from Database import db
 from time import time
 
 @Client.on_message(filters.command('reset') & filters.user(SUDO_USERS))
-async def reset(client: Client, message: Message):
+async def reset(_, m):
     """
-    Reset the count values in the database.
+    Resets the count values.
     """
     await reset_count()
     await reset_count_2()
-    await message.reply(' **Count has been reset....** ')
+    await m.reply('**Count has been reset....**')
 
-# Variable to confirm the reset of the entire database
-confirm = False
-t = time()
+confirm_reset = False
+last_request_time = time()
 
 @Client.on_message(filters.command('resets') & filters.user(SUDO_USERS))
-async def resets(client: Client, message: Message):
+async def resets(_, m):
     """
-    Reset the entire database except for count and users collections.
+    Resets the database, excluding count and users collections.
+    This command requires confirmation.
     """
-    global confirm, t
-    if int(time() - t) > 30:
-        confirm = False
-    if not confirm:
-        confirm = True
-        t = time()
-        return await message.reply('Are You Sure? You are Doing Reset\nBot Settings if Yes Than Type Again!!..')
+    global confirm_reset, last_request_time
+    if int(time() - last_request_time) > 30:
+        confirm_reset = False
+    if not confirm_reset:
+        confirm_reset = True
+        last_request_time = time()
+        return await m.reply('Are You Sure? You are doing a reset of bot settings.\nIf yes, then type again!!')
     
     collections = await db.list_collection_names()
     for collection_name in collections:
@@ -38,4 +37,4 @@ async def resets(client: Client, message: Message):
             continue
         await db[collection_name].drop()
     
-    await message.reply('DB Formatted.')
+    await m.reply('DB Formatted.')
