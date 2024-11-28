@@ -270,7 +270,7 @@ async def start_func(_, m):
     except Exception:
         pass
     control_batch.remove(user_id) if user_id in control_batch else None
-    elif command.startswith('batchtwo')):
+    elif command.startswith('batchtwo'):
             encr = command[8:]
             for chat in chats:
                 if not await check_fsub(user_id):
