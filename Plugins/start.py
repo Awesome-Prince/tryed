@@ -16,7 +16,7 @@ from config import (
     STICKER_ID, 
     AUTO_DELETE_TIME, 
     CONTENT_SAVER, 
-    TUTORIAL_LINK,
+    TUTORIAL_LINK
 )
 from .encode_decode import decrypt, Char2Int
 from .block import block_dec
@@ -146,7 +146,7 @@ async def start(client: Client, message: Message):
                 dic[str(ok.id)] = [str(ok1.id), time(), f'https://t.me/{me.username}?start=get{encr}']
                 await update(message.from_user.id, dic)
             return
-        elif command.startswith('batchone'):
+            elif command.startswith('batchone'):
             encr = command[8:]
             for chat in chats:
                 if not await check_fsub(user_id):
@@ -209,7 +209,7 @@ async def start(client: Client, message: Message):
             for chat in chats:
                 if not await check_fsub(user_id):
                     mark = await markup(client, f'https://t.me/{me.username}?start=batchtwo{encr}')
-                    returnawait message.reply(TRY_AGAIN_TEXT.format(message.from_user.mention), reply_markup=mark)
+                    return await message.reply(TRY_AGAIN_TEXT.format(message.from_user.mention), reply_markup=mark)
             std = await message.reply_sticker(STICKER_ID)
             spl = decrypt(encr).split('|')[0].split('-')
             st = Char2Int(spl[0])
@@ -222,7 +222,7 @@ async def start(client: Client, message: Message):
                     mess_ids.append(list(range(st, st + 200)))
                     st += 200
                 if en - st + 1 > 0:
-                    mess_ids.append(list(range(st, en + 1)))
+                    mess_ids.append(list(range(st, en+1)))
                 messes = []
                 for ids in mess_ids:
                     messes += await client.get_messages(DB_CHANNEL_2_ID, ids)
@@ -260,16 +260,79 @@ async def start(client: Client, message: Message):
         await message.reply(START_MESSAGE_2.format(message.from_user.mention), reply_markup=await start_markup(client))
 
 @Client.on_message(filters.command('start') & filters.private)
-async def start_func(client: Client, message: Message):
-    """
-    Handle the /start command.
-    """
-    user_id = message.from_user.id
+async def start_func(_, m):
+    user_id = m.from_user.id
     if user_id in control_batch:
         return
     control_batch.append(user_id)
     try:
-        await start(client, message)
+        await start(_, m)
+    except Exception:
+        pass
+    control_batch.remove(user_id) if user_id in control_batch else None
+    elif command.startswith('batchtwo')):
+            encr = command[8:]
+            for chat in chats:
+                if not await check_fsub(user_id):
+                    mark = await markup(client, f'https://t.me/{me.username}?start=batchtwo{encr}')
+                    return await message.reply(TRY_AGAIN_TEXT.format(message.from_user.mention), reply_markup=mark)
+            std = await message.reply_sticker(STICKER_ID)
+            spl = decrypt(encr).split('|')[0].split('-')
+            st = Char2Int(spl[0])
+            en = Char2Int(spl[1])
+            if st == en:
+                messes = [await client.get_messages(DB_CHANNEL_2_ID, st)]
+            else:
+                mess_ids = []
+                while en - st + 1 > 200:
+                    mess_ids.append(list(range(st, st + 200)))
+                    st += 200
+                if en - st + 1 > 0:
+                    mess_ids.append(list(range(st, en+1)))
+                messes = []
+                for ids in mess_ids:
+                    messes += await client.get_messages(DB_CHANNEL_2_ID, ids)
+            okkie = None
+            if len(messes) > 10:
+                okkie = await message.reply("It's Take Few Seconds....")
+            haha = []
+            if not prem:
+                for msg in messes:
+                    if msg.empty:
+                        continue
+                    gg = await tryer(msg.copy, message.from_user.id, caption=None, reply_markup=None, protect_content=True)
+                    haha.append(gg)
+                    await asyncio.sleep(1)
+            else:
+                for msg in messes:
+                    if msg.empty:
+                        continue
+                    gg = await tryer(msg.copy, message.from_user.id, caption=None, reply_markup=None)
+                    haha.append(gg)
+                    await asyncio.sleep(1)
+            await std.delete()
+            if AUTO_DELETE_TIME != 0:
+                ok1 = await message.reply(AUTO_DELETE_TEXT.format(AUTO_DELETE_STR))
+                dic = await get(message.from_user.id)
+                for ok in haha:
+                    if not ok:
+                        continue
+                    dic[str(ok.id)] = [str(ok1.id), time(), f'https://t.me/{me.username}?start=batchtwo{encr}']
+                await update(message.from_user.id, dic)
+            if okkie:
+                await okkie.delete()
+            return
+    else:
+        await message.reply(START_MESSAGE_2.format(message.from_user.mention), reply_markup=await start_markup(client))
+
+@Client.on_message(filters.command('start') & filters.private)
+async def start_func(_, m):
+    user_id = m.from_user.id
+    if user_id in control_batch:
+        return
+    control_batch.append(user_id)
+    try:
+        await start(_, m)
     except Exception:
         pass
     control_batch.remove(user_id) if user_id in control_batch else None
