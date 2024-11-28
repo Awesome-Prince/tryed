@@ -1,30 +1,25 @@
 #!/bin/bash
 
-# Killing any existing screen sessions
-echo "Killing any existing screen sessions..."
+# Terminate any running screen sessions
 pkill screen
 
-# Pull the latest changes from the Git repository
-echo "Pulling latest code from Git..."
+# Pull latest updates from Git
 git pull
+
+# Clear the terminal
 clear
 
-# Check if the 'manik' virtual environment exists, if not, create it
+# Create virtual environment if it doesn't exist
 if [ ! -d "manik" ]; then
-    echo "Creating virtual environment 'manik'..."
     python3 -m venv manik
-else
-    echo "Virtual environment 'manik' already exists."
 fi
 
 # Activate the virtual environment
-echo "Activating virtual environment..."
 source manik/bin/activate
+
+# Clear the terminal again after activation
 clear
 
-# Start a new screen session and run the Python script in the background
-echo "Starting the 'manik_session' in screen..."
+# Start a new screen session for the bot
 screen -dmS manik_session
 screen -S manik_session -X stuff 'python3 start.py\n'
-
-echo "Setup complete. 'manik_session' is running."
