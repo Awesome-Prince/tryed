@@ -1,76 +1,57 @@
 from pyrogram import Client, filters
-from pyrogram.types import ChatMemberUpdated, InlineKeyboardButton as IKB, InlineKeyboardMarkup as IKM
-from config import FSUB_1, FSUB_2, TUTORIAL_LINK
-from templates import LEAVE_MESSAGE
+from pyrogram.types import InlineKeyboardMarkup as IKM, InlineKeyboardButton as IKB
+from config import FSUB_1, FSUB_2, JOIN_IMAGE, MUST_VISIT_LINK, TUTORIAL_LINK
+from templates import JOIN_MESSAGE
 from Database.settings import get_settings
-from Plugins.start import get_chats
+from Database.users import add_user_2
+from .join_leave import get_chats
 
 # List of subscription channels
 FSUB = [FSUB_1, FSUB_2]
-markup = None
 
-async def build(_):
+@Client.on_chat_join_request(filters.chat(FSUB_1))
+async def cjr(_: Client, r):
     """
-    Build the inline keyboard markup for join and tutorial links.
+    Handle chat join requests and approve them if auto_approval is enabled.
     """
-    global markup
-    if not markup:
-        chats = await get_chats(_)
-        new_links = []
-        for chat in chats:
-            invite_link = await _.create_chat_invite_link(chat.id, creates_join_request=True)
-            new_links.append(invite_link.invite_link)
-        for i, link in enumerate(new_links):
-            chats[i].invite_link = link
-        markup = IKM(
-            [
-                [
-                    IKB("ᴊᴏɪɴ ᴀɢᴀɪɴ", url=chats[0].invite_link),
-                    IKB("ᴄᴏᴅᴇ ʟᴀɴɢᴜᴀɢᴇ", url="https://t.me/Utra_XYZ/9")
-                ],
-                [
-                    IKB('ʜᴏᴡ ᴛᴏ ᴜsᴇ ᴛᴇʀᴀʙᴏx ʙᴏᴛ', url=TUTORIAL_LINK)
-                ]
-            ]
-        )
-    return markup
+    # Get invite link for the backup channel
+    link = (await get_chats(_))[1].invite_link
 
-@Client.on_chat_member_updated(filters.chat(FSUB_1))
-async def jl(_: Client, cmu: ChatMemberUpdated):
-    """
-    Handle chat member updates (join/leave events) and send appropriate messages.
-    """
-    user = cmu.from_user
-    left = cmu.old_chat_member and not cmu.new_chat_member
-    joined = cmu.new_chat_member and not cmu.old_chat_member
-    
-    if not left and not joined:
-        return
-    
+    # Create markup for the welcome message
+    markup = IKM(
+      [
+        [
+          IKB("ʙᴀᴄᴋᴜᴘ ᴄʜᴀɴɴᴇʟ", url=link),
+          IKB("ᴄᴏᴅᴇ ʟᴀɴɢᴜᴀɢᴇ", url=MUST_VISIT_LINK)
+        ],
+        [
+          IKB("ʜᴏᴡ ᴛᴏ ᴜsᴇ ᴛᴇʀᴀʙᴏx ʙᴏᴛ", url=TUTORIAL_LINK)
+        ]
+      ]
+    )
+
     settings = await get_settings()
-    markup = await build(_)
-    
-    if joined:
-        """
-        if not settings['join']:
-            return
-        try:
-            if JOIN_IMAGE:
-                await _.send_photo(user.username if user.username else user.id, JOIN_IMAGE, caption=JOIN_MESSAGE, reply_markup=markup)
-            else:
-                await _.send_message(user.username if user.username else user.id, JOIN_MESSAGE, reply_markup=markup)
-        except Exception as e:
-            print(e)
-        """
-        ...
-    else:
-        if not settings['leave']:
-            return
-        try:
-            # if LEAVE_IMAGE:
-            #     await _.send_photo(user.username if user.username else user.id, LEAVE_IMAGE, caption=LEAVE_MESSAGE, reply_markup=markup)
-            # else:
-            #     await _.send_message(user.username if user.username else user.id, LEAVE_MESSAGE, reply_markup=markup)
-            await _.send_voice(user.username if user.username else user.id, 'Voice/uff.ogg', caption=LEAVE_MESSAGE, reply_markup=markup)
-        except Exception as e:
-            print(f"Failed to send leave message: {e}")
+
+    # If auto_approval is disabled, return
+    if not settings['auto_approval']:
+        return
+
+    # Approve the chat join request
+    await _.approve_chat_join_request(
+        r.chat.id,
+        r.from_user.id
+    )
+
+    # If sending join messages is disabled, return
+    if not settings["join"]:
+        return
+
+    # Send welcome message
+    try:
+        if JOIN_IMAGE:
+            await _.send_photo(r.from_user.id, JOIN_IMAGE, caption=JOIN_MESSAGE.format(r.from_user.mention), reply_markup=markup)
+        else:
+            await _.send_message(r.from_user.id, JOIN_MESSAGE.format(r.from_user.mention), reply_markup=markup)
+        await add_user_2(r.from_user.id)
+    except Exception as e:
+        print(f"Failed to send join message: {e}")
