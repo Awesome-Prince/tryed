@@ -1,21 +1,26 @@
 from . import db
 
-# Accessing the 'auto_delete_2' collection from the 'db' module
-db = db.auto_delete_2  
+db = db.auto_delete_2
 
-# Function to update or insert a document for a given user_id in the 'auto_delete_2' collection
-async def update_2(user_id, dic):
+async def update_2(user_id: int, dic: dict) -> None:
+    """
+    Update or insert the dictionary for a specific user in the auto_delete_2 collection.
+    """
     await db.update_one({'user_id': user_id}, {'$set': {'dic': dic}}, upsert=True)
 
-# Function to retrieve the 'dic' field of a user document by user_id from the 'auto_delete_2' collection
-async def get_2(user_id):
-    x = await db.find_one({'user_id': user_id})
-    if x:
-        return x['dic']
-    return {}  # Return an empty dictionary if no document is found
+async def get_2(user_id: int) -> dict:
+    """
+    Retrieve the dictionary for a specific user from the auto_delete_2 collection.
+    """
+    user_data = await db.find_one({'user_id': user_id})
+    if user_data:
+        return user_data['dic']
+    return {}
 
-# Function to fetch all user_ids from the 'auto_delete_2' collection and return them as a list
 async def get_all_2() -> list[int]:
-    x = db.find()  # Query to get all documents in the collection
-    x = await x.to_list(length=None)  # Convert the cursor to a list of documents
-    return [y['user_id'] for y in x]  # Extract and return the user_ids as a list
+    """
+    Retrieve a list of all user IDs in the auto_delete_2 collection.
+    """
+    cursor = db.find()
+    user_list = await cursor.to_list(length=None)
+    return [user['user_id'] for user in user_list]
