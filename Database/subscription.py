@@ -1,29 +1,25 @@
 from . import db
 import time
 
+# Select the collection for managing subscriptions
 db = db.subscription
 
-# Set active subscription for a user
-async def active_sub(user_id):
-    try:
-        await db.update_one({"user_id": user_id}, {"$set": {"time": time.time()}}, upsert=True)
-    except Exception as e:
-        print(f"Error setting active subscription for user {user_id}: {e}")
+async def active_sub(user_id: int) -> None:
+    """
+    Activate a subscription by updating or inserting the user ID with the current time.
+    """
+    await db.update_one({"user_id": user_id}, {"$set": {"time": time.time()}}, upsert=True)
 
-# Get all subscriptions and their timestamps
-async def get_all_subs():
-    try:
-        x = db.find()
-        x = await x.to_list(length=None)
-        # Return dictionary of user_id -> subscription time
-        return {u["user_id"]: u["time"] for u in x}
-    except Exception as e:
-        print(f"Error retrieving subscriptions: {e}")
-        return {}
+async def get_all_subs() -> dict[int, float]:
+    """
+    Retrieve all subscriptions as a dictionary with user IDs and their subscription times.
+    """
+    cursor = db.find()
+    subs_list = await cursor.to_list(length=None)
+    return {user["user_id"]: user["time"] for user in subs_list}
 
-# Delete subscription for a user
-async def del_sub(user_id):
-    try:
-        await db.delete_one({"user_id": user_id})
-    except Exception as e:
-        print(f"Error deleting subscription for user {user_id}: {e}")
+async def del_sub(user_id: int) -> None:
+    """
+    Delete a subscription by removing the user ID from the subscription collection.
+    """
+    await db.delete_one({"user_id": user_id})
