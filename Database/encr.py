@@ -1,18 +1,14 @@
 from . import db
 
-# Select the collection for encryption data
+# Accessing the encr collection
 db = db.encr
 
-async def update(encr: str, e: str) -> None:
-    """
-    Update or insert the encryption data for a specific key.
-    """
+async def update(encr, e):
+    """Update or insert encryption data."""
     await db.update_one({"encr": encr}, {"$set": {"e": e}}, upsert=True)
-
-async def get_encr(encr: str) -> str:
-    """
-    Retrieve the encryption data for a specific key.
-    """
+    
+async def get_encr(encr):
+    """Get encryption data based on encr value."""
     encr_data = await db.find_one({"encr": encr})
     if encr_data:
         return encr_data["e"]
