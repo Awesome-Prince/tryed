@@ -13,3 +13,11 @@ async def get_encr(encr):
     if encr_data:
         return encr_data["e"]
     return None
+
+def decrypt(text):
+    # Add your decryption logic here
+    pass
+
+def Char2Int(char):
+    # Add your char to int conversion logic here
+    pass
