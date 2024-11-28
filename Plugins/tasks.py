@@ -1,13 +1,12 @@
 import asyncio
 from time import time
-from pyrogram import Client
 from pyrogram.types import InlineKeyboardButton as IKB, InlineKeyboardMarkup as IKM
 from Database.auto_delete import get, update, get_all
 from config import AUTO_DELETE_TIME
+from main import app
 from .encode_decode import decrypt, Char2Int
 from templates import POST_DELETE_TEXT
 from . import tryer
-from main import app
 
 async def auto_delete_task():
     """
