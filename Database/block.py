@@ -1,24 +1,18 @@
 from . import db
 from config import BOT_TOKEN
 
-# Initialize the database collection for blocked users
+# Access the block collection based on BOT_TOKEN
 db = db[f"block_{BOT_TOKEN.split(':')[0]}"]
 
-async def block(user_id: int) -> None:
-    """
-    Block a user by inserting their user ID into the block collection.
-    """
+async def block(user_id):
+    """Block a user by inserting user_id into the collection."""
     await db.insert_one({'user_id': user_id})
 
-async def unblock(user_id: int) -> None:
-    """
-    Unblock a user by deleting their user ID from the block collection.
-    """
+async def unblock(user_id):
+    """Unblock a user by deleting user_id from the collection."""
     await db.delete_one({'user_id': user_id})
 
-async def is_blocked(user_id: int) -> bool:
-    """
-    Check if a user is blocked by finding their user ID in the block collection.
-    """
+async def is_blocked(user_id):
+    """Check if a user is blocked by searching for user_id in the collection."""
     user_data = await db.find_one({'user_id': user_id})
-    return bool(user_data)
+    return user_data is not None
