@@ -1,85 +1,87 @@
 from pyrogram import Client, idle
-from config import Config
+from config import *
 import sys
 from resolve import ResolvePeer
+import asyncio
+from time import time
 
-# List of forced subscription channels
-FSUB = [Config.FSUB1, Config.FSUB2]
+# List of channels to subscribe
+FSUB = [FSUB_1, FSUB_2]
 
 class ClientLike(Client):
-    """
-    Custom Client class for handling additional functionality.
-    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.last_message_time = {}
 
     async def resolve_peer(self, id):
         obj = ResolvePeer(self)
         return await obj.resolve_peer(id)
 
-# Initialize the main bot client
+    async def rate_limit(self, chat_id, delay=1):
+        """
+        Ensure there's a delay between sending messages to avoid flood limits.
+        """
+        now = time()
+        if chat_id in self.last_message_time:
+            elapsed = now - self.last_message_time[chat_id]
+            if elapsed < delay:
+                await asyncio.sleep(delay - elapsed)
+        self.last_message_time[chat_id] = now
+
+# Initialize the bot clients
 app = ClientLike(
-    'bot1',
-    api_id=Config.API_ID,
-    api_hash=Config.API_HASH,
-    bot_token=Config.BOT_TOKEN,
+    ':91:',
+    api_id=API_ID,
+    api_hash=API_HASH,
+    bot_token=BOT_TOKEN,
     plugins=dict(root='Plugins')
 )
 
-# Initialize the notifier bot client
 app1 = ClientLike(
-    'bot2',
-    api_id=Config.API_ID,
-    api_hash=Config.API_HASH,
-    bot_token=Config.BOT_TOKEN2,
+    ':91-1:',
+    api_id=API_ID,
+    api_hash=API_HASH,
+    bot_token=BOT_TOKEN_2,
     plugins=dict(root='Plugins1')
 )
 
-async def start() -> None:
-    """
-    Start the bot clients and run initial checks.
-    """
+async def start():
     await app.start()
     await app1.start()
     ret = False
 
-    async def test_message(client, channel_id, channel_name) -> None:
-        """
-        Test if the bot can send a message to the given channel.
-        """
-        nonlocal ret
+    async def send_and_delete(client, channel_id, message):
         try:
-            message = await client.send_message(channel_id, '.')
-            await message.delete()
+            await client.rate_limit(channel_id, delay=0.5)  # Reduced delay for better performance
+            m = await client.send_message(channel_id, message)
+            await m.delete()
         except Exception as e:
-            print(f'Bot cannot send message in {channel_name} channel. Error: {e}')
-            ret = True
+            print(e)
+            return False
+        return True
 
-    # Test message sending capability for each important channel
-    await test_message(app, Config.DB_CHANNEL_ID, 'DB')
-    await test_message(app, Config.DB_CHANNEL2_ID, 'Backup DB')
-    await test_message(app, Config.AUTO_SAVE_CHANNEL_ID, 'Auto Save')
+    tasks = [
+        send_and_delete(app, DB_CHANNEL_ID, '.'),
+        send_and_delete(app, DB_CHANNEL_2_ID, '.'),
+        send_and_delete(app, AUTO_SAVE_CHANNEL_ID, '.')
+    ]
+    if LOG_CHANNEL_ID:
+        tasks.append(send_and_delete(app, LOG_CHANNEL_ID, '.'))
 
-    if Config.LOG_CHANNEL_ID:
-        await test_message(app, Config.LOG_CHANNEL_ID, 'LOG')
+    for x in FSUB:
+        tasks.append(send_and_delete(app, x, '.'))
+        tasks.append(send_and_delete(app1, x, '.'))
 
-    # Test message sending capability for forced subscription channels
-    for channel_id in FSUB:
-        await test_message(app, channel_id, f'FSUB {channel_id}')
-        await test_message(app1, channel_id, f'Notifier Bot FSUB {channel_id}')
-
-    # Exit if any test failed
-    if ret:
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+    if any(not result for result in results):
         sys.exit()
 
-    # Print bot usernames
-    bot_user = await app.get_me()
-    notifier_bot_user = await app1.get_me()
-    print(f'@{bot_user.username} started.')
-    print(f'@{notifier_bot_user.username} started.')
-
+    x = await app.get_me()
+    y = await app1.get_me()
+    print(f'@{x.username} started.')
+    print(f'@{y.username} started.')
     await idle()
 
 if __name__ == "__main__":
-    import asyncio
-    asyncio.run(start())
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(start())
