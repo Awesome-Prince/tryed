@@ -220,5 +220,4 @@ async def start(client: Client, message: Message):
             if okkie:
                 await okkie.delete()
 
-# Initialize and run the client
-app.run()
+# Initialize
