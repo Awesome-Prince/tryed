@@ -219,3 +219,6 @@ async def start(client: Client, message: Message):
                 await update(message.from_user.id, dic)
             if okkie:
                 await okkie.delete()
+
+# Initialize and run the client
+app.run()
