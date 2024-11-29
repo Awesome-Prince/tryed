@@ -20,7 +20,7 @@ from config import (
     CONTENT_SAVER, 
     TUTORIAL_LINK
 )
-from utils import get_chats  # Correctly import from utils
+from helpers import get_chats  # Correctly import from utils
 from .encode_decode import decrypt, Char2Int
 from .block import block_dec
 from . import AUTO_DELETE_STR, build
