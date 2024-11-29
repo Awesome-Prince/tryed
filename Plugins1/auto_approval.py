@@ -4,7 +4,7 @@ from config import FSUB_1, FSUB_2, JOIN_IMAGE, MUST_VISIT_LINK, TUTORIAL_LINK
 from templates import JOIN_MESSAGE
 from Database.settings import get_settings
 from Database.users import add_user_2
-from .join_leave import get_chats
+from helpers import get_chats
 
 # List of subscription channels
 FSUB = [FSUB_1, FSUB_2]
