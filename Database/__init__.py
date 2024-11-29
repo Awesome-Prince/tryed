@@ -3,7 +3,7 @@ from config import MONGO_DB_URI # Import from config.py
 
 # MongoDB connection setup with environment variable
 client = AsyncIOMotorClient(MONGO_DB_URI)
-db = client[mnaik]  # Use the database name
+db = client[manik]  # Use the database name
 
 from time import time
 import asyncio
