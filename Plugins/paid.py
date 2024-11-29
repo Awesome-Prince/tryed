@@ -7,7 +7,7 @@ from Database.subscription import get_all_subs, del_sub, active_sub
 from templates import SU_TEXT, EXPIRE_TEXT
 from Database import tryer
 import datetime
-import asyncio  # Add this import
+import asyncio
 import time
 from main import app
 
@@ -16,11 +16,11 @@ exp = int(EXPIRY_TIME * 86400)
 def build_markup_2(privileges, user_id, activate=True):
     return IKM(
         [
-            [IKB("𝘈𝘭𝘰𝘸 𝘉𝘢𝘵𝘤𝘩", callback_data="answer"), IKB("✅" if privileges[0] else "❌", callback_data=f"toggleab_{user_id}")],
-            [IKB("𝘚𝘶𝘱𝘦𝘳 𝘜𝘴𝘦𝘳", callback_data="answer"), IKB("✅" if privileges[1] else "❌", callback_data=f"togglesu_{user_id}")],
-            [IKB("𝘔𝘺 𝘤𝘰𝘯𝘵𝘦𝘯𝘵", callback_data="answer"), IKB("✅" if privileges[2] else "❌", callback_data=f"togglemc_{user_id}")],
-            [IKB("𝘈𝘭𝘭𝘰𝘸 𝘋𝘔", callback_data="answer"), IKB("✅" if privileges[3] else "❌", callback_data=f"togglead_{user_id}")],
-            [IKB("𝘈𝘤𝘵𝘪𝘷𝘢𝘵𝘦" if activate else "𝘋𝘦𝘢𝘤𝘵𝘪𝘷𝘢𝘵𝘦", callback_data=f"activate_{user_id}")]
+            [IKB("Allow Batch", callback_data="answer"), IKB("✅" if privileges[0] else "❌", callback_data=f"toggleab_{user_id}")],
+            [IKB("Super User", callback_data="answer"), IKB("✅" if privileges[1] else "❌", callback_data=f"togglesu_{user_id}")],
+            [IKB("My Content", callback_data="answer"), IKB("✅" if privileges[2] else "❌", callback_data=f"togglemc_{user_id}")],
+            [IKB("Allow DM", callback_data="answer"), IKB("✅" if privileges[3] else "❌", callback_data=f"togglead_{user_id}")],
+            [IKB("Activate" if activate else "Deactivate", callback_data=f"activate_{user_id}")]
         ]
     )
 
@@ -38,7 +38,7 @@ async def pay_settings(_, m):
         elapsed_seconds = int(time.time() - subs[user_id])
         remaining_seconds = exp - elapsed_seconds
         expiry_date = datetime.datetime.now() + datetime.timedelta(seconds=remaining_seconds)
-        await m.reply(f"**This User Already SuperUser**\n<pre>Expiry: {expiry_date.day}-{expiry_date.month}-{expiry_date-year}</pre>", 
+        await m.reply(f"**This User Already SuperUser**\n<pre>Expiry: {expiry_date.day}-{expiry_date.month}-{expiry_date.year}</pre>", 
                       reply_markup=build_markup_2(priv, user_id, activate=False))
     else:
         await m.reply("**Before Activate Give Access..**", reply_markup=build_markup_2(priv, user_id))
@@ -56,27 +56,27 @@ async def activate_cbq(_, q):
         if not any(priv):
             return await q.answer("At least one privilege should be up to activate.", show_alert=True)
         
-        markup = IKM([[IKB("𝘊𝘰𝘯𝘯𝘦𝘤𝘵", callback_data='connect'), IKB("𝘛𝘶𝘵𝘰𝘳𝘪𝘢𝘭", url=CONNECT_TUTORIAL_LINK)]]) if priv[1] else None
+        markup = IKM([[IKB("Connect", callback_data='connect'), IKB("Tutorial", url=CONNECT_TUTORIAL_LINK)]]) if priv[1] else None
         await active_sub(user_id)
         
         expiry_date = datetime.datetime.now() + datetime.timedelta(seconds=exp)
-        await tryer(_.send_photo, user_id, SU_IMAGE, caption=SU_TEXT.format((await _.get_users(user_id)).mention, 
-                                                                           f'{expiry_date.day}-{expiry-date.month}-{expiry-date-year}'), 
+        await tryer_with_retry(_.send_photo, user_id, SU_IMAGE, caption=SU_TEXT.format((await _.get_users(user_id)).mention, 
+                                                                           f'{expiry_date.day}-{expiry_date.month}-{expiry_date-year}'), 
                                                                            reply_markup=markup)
         await q.answer()
-        await asyncio.sleep(0.5)  # Minimal delay
-        await tryer(q.edit_message_text, 'Activated.', reply_markup=None)
+        await asyncio.sleep(0.5)  # Minimal delay to avoid flood wait
+        await tryer_with_retry(q.edit_message_text, 'Activated.', reply_markup=None)
     else:
         if any(priv):
             return await q.answer("Disable all privileges to deactivate.", show_alert=True)
         
         await del_sub(user_id)
-        admin_contact_link = "https://t.me/CuteGirlTG?text=%2A%2A%20I%20saw%20my%20subscription%20is%20stopped%20by%20admin%20but%20why%3F%20%2A%2A"
-        markup = IKM([[IKB('𝘛𝘢𝘭𝘬 𝘛𝘰 𝘈𝘥𝘮𝘪𝘯', url=admin_contact_link)]])
-        await tryer(_.send_message, user_id, '**Your Membership Cancelled By Admin**', reply_markup=markup)
+        admin_contact_link = "https://t.me/CuteGirlTG?text=I%20saw%20my%20subscription%20is%20stopped%20by%20admin%20but%20why%3F"
+        markup = IKM([[IKB('Talk To Admin', url=admin_contact_link)]])
+        await tryer_with_retry(_.send_message, user_id, '**Your Membership Cancelled By Admin**', reply_markup=markup)
         await q.answer()
-        await asyncio.sleep(0.5)  # Minimal delay
-        await tryer(q.edit_message_text, 'Deactivated.', reply_markup=None)
+        await asyncio.sleep(0.5)  # Minimal delay to avoid flood wait
+        await tryer_with_retry(q.edit_message_text, 'Deactivated.', reply_markup=None)
 
 async def pay_cbq(_, q):
     user_id = int(q.data.split("_")[1])
@@ -96,10 +96,10 @@ async def pay_cbq(_, q):
     
     await update_privileges(user_id, priv[0], priv[1], priv[2], priv[3])
     await q.answer()
-    await asyncio.sleep(0.5)  # Minimal delay
+    await asyncio.sleep(0.5)  # Minimal delay to avoid flood wait
     await q.edit_message_reply_markup(reply_markup=build_markup_2(priv, user_id, activate=user_id not in subs)) 
 
-renew = IKM([[IKB("𝘉𝘶𝘺 𝘈𝘨𝘢𝘪𝘯", url="https://t.me/CuteGirlTG?text=**Hii%20I%20Want%20To%20Renew%20My%20Membership...**")]])
+renew = IKM([[IKB("Buy Again", url="https://t.me/CuteGirlTG?text=Hii%20I%20Want%20To%20Renew%20My%20Membership...")]])
 
 async def task():
     while True:
@@ -108,9 +108,16 @@ async def task():
             if int(time.time() - subs[user_id]) >= exp:
                 await del_sub(user_id)
                 await update_privileges(user_id, False, False, False, False) 
-                mention = (await tryer(app.get_users, user_id)).mention
-                await asyncio.sleep(0.5)  # Minimal delay
-                await tryer(app.send_photo, user_id, SU_IMAGE, caption=EXPIRE_TEXT.format(mention, mention), reply_markup=renew)
+                mention = (await tryer_with_retry(app.get_users, user_id)).mention
+                await asyncio.sleep(0.5)  # Minimal delay to avoid flood wait
+                await tryer_with_retry(app.send_photo, user_id, SU_IMAGE, caption=EXPIRE_TEXT.format(mention, mention), reply_markup=renew)
         await asyncio.sleep(exp / 1000)
 
 asyncio.create_task(task())
+
+async def tryer_with_retry(func, *args, **kwargs):
+    while True:
+        try:
+            return await func(*args, **kwargs)
+        except FloodWait as e:
+            await asyncio.sleep(e.value + 1)  # Wait for the specified time plus 1 second
