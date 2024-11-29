@@ -1,3 +1,5 @@
+chats = []  # Global variable to store chats
+
 async def get_chats(client):
     """
     Get the subscription channels and generate invite links.
