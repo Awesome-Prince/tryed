@@ -1,4 +1,6 @@
-chats = []  # Global variable to store chats
+from config import FSUB_1, FSUB_2  # Importing from config
+
+chats = []  # Define and initialize the global variable
 
 async def get_chats(client):
     """
