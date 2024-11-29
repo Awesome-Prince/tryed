@@ -8,6 +8,7 @@ from Database.privileges import get_privileges
 from Database.sessions import get_session
 from Database.encr import get_encr
 from Database.users import add_user, is_user
+from Database import tryer
 from templates import AUTO_DELETE_TEXT, START_MESSAGE, START_MESSAGE_2, TRY_AGAIN_TEXT
 from config import (
     DB_CHANNEL_ID, 
