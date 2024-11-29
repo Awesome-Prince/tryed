@@ -227,9 +227,4 @@ async def run_app():
         await app.idle()
     except FloodWait as e:
         print(f"Flood wait: waiting for {e.value} seconds.")
-        await asyncio.sleep(e.value + 1)
-        await run_app()
-
-# Entry point for the script
-if __name__ == "__main__":
-    asyncio.run(run_app())
+        await
