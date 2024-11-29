@@ -7,13 +7,7 @@ from pyrogram.types import (
 from config import TUTORIAL_LINK, AUTO_DELETE_TIME
 from helpers import get_chats  # Import from new helpers module
 
-# Function to handle FloodWait exceptions
-async def tryer(func, *args, **kwargs):
-    try:
-        return await func(*args, **kwargs)
-    except FloodWait as e:
-        await asyncio.sleep(e.value)
-        return await func(*args, **kwargs)
+# Remove tryer function from here
 
 # Function to convert seconds to human-readable format
 def grt(seconds: int) -> str:
