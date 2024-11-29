@@ -14,13 +14,13 @@ async def cjr(client: Client, request):
         return
 
     # Add delay before approving the request
-    await asyncio.sleep(2)  # Wait for 2 seconds
+    await asyncio.sleep(1)  
     
     # Approve the chat join request
     await tryer(client.approve_chat_join_request, request.chat.id, request.from_user.id)
 
     # Add delay before sending the welcome message
-    await asyncio.sleep(2)  # Wait for 2 seconds
+    await asyncio.sleep(1)  
 
     # Send a welcome message to the user
     await tryer(client.send_message, request.from_user.id, "Hi")
