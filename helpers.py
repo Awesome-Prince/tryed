@@ -34,12 +34,18 @@ async def get_chats(client):
             )
             chats = chat_results
 
+            # Log chat details for verification
+            logging.info(f"Fetched chats: {chats}")
+
             # Use asyncio.gather for invite link generation in parallel
             new_links = await asyncio.gather(
                 *[client.create_chat_invite_link(chat.id, creates_join_request=True) for chat in chats]
             )
             for idx, chat in enumerate(chats):
                 chat.invite_link = new_links[idx].invite_link  # Assign the invite link to the chat object
+
+            # Log the generated invite links
+            logging.info(f"Generated invite links: {[chat.invite_link for chat in chats]}")
 
         except Exception as e:
             logging.error(f"Error in get_chats function: {e}")
