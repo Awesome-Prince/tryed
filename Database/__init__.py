@@ -15,11 +15,12 @@ from helpers import get_chats
 
 # Function to handle FloodWait exceptions
 async def tryer(func, *args, **kwargs):
-    try:
-        return await func(*args, **kwargs)
-    except FloodWait as e:
-        await asyncio.sleep(e.value)
-        return await func(*args, **kwargs)
+    while True:
+        try:
+            return await func(*args, **kwargs)
+        except FloodWait as e:
+            print(f"Flood wait: waiting for {e.value} seconds.")
+            await asyncio.sleep(e.value + 1)  # Waiting time as suggested by Telegram
 
 # Exporting necessary variables and functions
 __all__ = ['tryer']
