@@ -2,11 +2,10 @@ from config import SUDO_USERS, EXPIRY_TIME, CONNECT_TUTORIAL_LINK, SU_IMAGE
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup as IKM, InlineKeyboardButton as IKB
 from pyrogram.errors import FloodWait
-# from pyrogram.errors import ConnectionError  # Comment out this line
 from Database.privileges import get_privileges, update_privileges
 from Database.subscription import get_all_subs, del_sub, active_sub
 from templates import SU_TEXT, EXPIRE_TEXT
-from . import tryer
+from Database import tryer  # Correct import
 import datetime
 import asyncio
 import time
