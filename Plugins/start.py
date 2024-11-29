@@ -8,7 +8,7 @@ from Database.privileges import get_privileges
 from Database.sessions import get_session
 from Database.encr import get_encr
 from Database.users import add_user, is_user
-from Database import tryer
+from Database import tryer  # Importing tryer from Database
 from templates import AUTO_DELETE_TEXT, START_MESSAGE, START_MESSAGE_2, TRY_AGAIN_TEXT
 from config import (
     DB_CHANNEL_ID, 
@@ -22,7 +22,7 @@ from config import (
 )
 from .encode_decode import decrypt, Char2Int
 from .block import block_dec
-from . import AUTO_DELETE_STR, tryer, build
+from . import AUTO_DELETE_STR, build
 from main import app
 
 # List of subscription channels
