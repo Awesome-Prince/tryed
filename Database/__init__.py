@@ -1,9 +1,9 @@
 from motor.motor_asyncio import AsyncIOMotorClient
-from config import MONGO_DB_URI, DATABASE_NAME  # Import from config.py
+from config import MONGO_DB_URI # Import from config.py
 
 # MongoDB connection setup with environment variable
 client = AsyncIOMotorClient(MONGO_DB_URI)
-db = client[DATABASE_NAME]  # Use the database name from config
+db = client[DATABASE]  # Use the database name
 
 from time import time
 import asyncio
