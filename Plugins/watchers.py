@@ -1,96 +1,57 @@
-from pyrogram import Client, filters
-from pyrogram.types import Message, InlineKeyboardButton as IKB, InlineKeyboardMarkup as IKM
-from config import (
-    SUDO_USERS, DB_CHANNEL_ID, DB_CHANNEL_2_ID,
-    LOG_CHANNEL_ID, LINK_GENERATE_IMAGE,
-    USELESS_IMAGE, TUTORIAL_LINK
-)
-from templates import USELESS_MESSAGE, LINK_GEN
-from .encode_decode import encrypt, Int2Char
-from Database.count import incr_count
-from Database.settings import get_settings
-from .batch import in_batch, batch_cwf as bcwf
-from .block import block_dec
-from . import alpha_grt, tryer
-from pyrogram.errors import FloodWait
-import threading
+from time import time
 import asyncio
-from .connect import in_work
-from .get import get
-from . import build
+from pyrogram.errors import FloodWait
+from pyrogram.types import Message, InlineKeyboardButton as IKB, InlineKeyboardMarkup as IKM
+from config import TUTORIAL_LINK, AUTO_DELETE_TIME
+from helpers import get_chats
+from Database import tryer
 
-watch = 1
-me = None
+# Function to convert seconds to human-readable format
+def grt(seconds: int) -> str:
+    if seconds < 60:
+        return f"{seconds}S"
+    if seconds < 3600:
+        return f"{int(seconds / 60)}M"
+    return f"{int(seconds / 3600)}H"
 
-async def get_me(_):
-    """
-    Get the bot's user information if not already fetched.
-    """
-    global me
-    if not me:
-        me = await _.get_me()
-    return me
+# Alternate function to convert seconds to human-readable format
+def alpha_grt(sec: int) -> str:
+    if sec < 60:
+        return f"{sec}S"
+    if sec < 3600:
+        return f"{int(sec / 60)}M"
+    return "60M+"
 
-@Client.on_message(filters.private, group=watch)
-@block_dec
-async def cwf(_: Client, m: Message):
-    """
-    Handles incoming private messages.
-    """
-    if in_work(m.from_user.id):
-        return
-    if in_batch(m.from_user.id):
-        return await bcwf(_, m)
-    if m.text and m.text.startswith("https://t.me/"):
-        ret = await get(_, m)
-        if ret:
-            return
-    if not m.from_user.id in SUDO_USERS:
-        if m.text:
-            if not m.text.lower().startswith(('/start', '/terminate', '/connect', '/bot', '..', '/batch', '/id')):
-                markup = await build(_)
-                if USELESS_IMAGE:
-                    await m.reply_photo(USELESS_IMAGE, caption=USELESS_MESSAGE, reply_markup=markup)
-                else:
-                    await m.reply(USELESS_MESSAGE, reply_markup=markup)
-        else:
-            markup = await build(_)
-            if USELESS_IMAGE:
-                await m.reply_photo(USELESS_IMAGE, caption=USELESS_MESSAGE, reply_markup=markup)
-            else:
-                await m.reply(USELESS_MESSAGE, reply_markup=markup)
-        return
-    if m.text and m.text.startswith('/'):
-        return
+# Convert AUTO_DELETE_TIME to human-readable format
+AUTO_DELETE_STR = grt(AUTO_DELETE_TIME)
 
-    settings = await get_settings()
-    """
-    if LINK_GENERATE_IMAGE and settings['image']:
-        try:
-            msg = await m.reply_photo(LINK_GENERATE_IMAGE, caption='**Generating Link...**', quote=True)
-        except FloodWait as e:
-            await asyncio.sleep(e.value)
-            msg = await m.reply_photo(LINK_GENERATE_IMAGE, caption='**Generating Link...**', quote=True)
-    else:
-        try:
-            msg = await m.reply('**Generating Link...**', quote=True)
-        except FloodWait as e:
-            await asyncio.sleep(e.value)
-            msg = await m.reply('**Generating Link...**', quote=True)
-    """
-    res = await asyncio.gather(
-        tryer(m.copy, DB_CHANNEL_ID),
-        tryer(m.copy, DB_CHANNEL_2_ID)
-    )
-    count = await incr_count()
-    encr = encrypt(f'{Int2Char(res[0].id)}|{Int2Char(count)}|{Int2Char(res[1].id)}')
-    link = f'https://t.me/{(await get_me(_)).username}?start=get{encr}'
-    duration_text = f"⋞⋮⋟ {alpha_grt(m.video.duration)}" if m.video else ''
-    txt = LINK_GEN.format(str(count), duration_text, link)
-    markup = IKM([[IKB('Share', url=link)]])
-    if LINK_GENERATE_IMAGE and settings['image']:
-        msg = await tryer(m.reply_photo, LINK_GENERATE_IMAGE, caption=txt, quote=True)
-    else:
-        msg = await tryer(m.reply, txt, quote=True)
-    if LOG_CHANNEL_ID and settings.get('logs', True):
-        await tryer(msg.copy, LOG_CHANNEL_ID)
+# Record the start time
+startTime = time()
+
+# Global variable for markup
+markup = None
+
+# Function to build inline keyboard markup
+async def build(_):
+    global markup
+    if not markup:
+        chats = await get_chats(_)
+        invite_links = []
+        for chat in chats:
+            invite_link = await _.create_chat_invite_link(chat.id, creates_join_request=True)
+            invite_links.append(invite_link.invite_link)
+        for chat, link in zip(chats, invite_links):
+            chat.invite_link = link
+        chat1, chat2 = chats[:2]
+        markup = IKM(
+            [
+                [
+                    IKB("ᴘᴏsᴛɪɴɢ ᴄʜᴀɴɴᴇʟ", url=chat1.invite_link),
+                    IKB("ʙᴀᴄᴋᴜᴘ ᴄʜᴀɴɴᴇʟ", url=chat2.invite_link)
+                ],
+                [
+                    IKB('ʜᴏᴡ ᴛᴏ ᴜsᴇ ᴛᴇʀᴀʙᴏx ʙᴏᴛ', url=TUTORIAL_LINK)
+                ]
+            ]
+        )
+    return markup
