@@ -1,3 +1,9 @@
+from motor.motor_asyncio import AsyncIOMotorClient
+
+# Example MongoDB connection setup
+client = AsyncIOMotorClient('mongodb://localhost:27017')
+db = client.mydatabase  # Adjust as per your database configuration
+
 from time import time
 import asyncio
 from pyrogram.errors import FloodWait
@@ -6,7 +12,6 @@ from pyrogram.types import (
 )
 from config import TUTORIAL_LINK, AUTO_DELETE_TIME
 from helpers import get_chats
-from .db_module import db  # Ensure db is imported correctly
 
 # Function to handle FloodWait exceptions
 async def tryer(func, *args, **kwargs):
