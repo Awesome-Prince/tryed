@@ -1,4 +1,4 @@
-from main import start, app
+from main import start, app, app1
 import os
 
 # Function for purging session files
@@ -11,6 +11,10 @@ def purge_sessions():
 # Purge session files
 purge_sessions()
 
-print("Starting Bots...")
+print("Starting Bot1...")
 os.system('clear')
 app.run(start())
+
+print("Starting Bot2...")
+os.system('clear')
+app1.run(start())
