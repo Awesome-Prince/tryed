@@ -1,9 +1,13 @@
 from pyrogram import Client, idle
 from config import *
 import sys
+import logging
 from resolve import ResolvePeer
 import asyncio
 from time import time
+
+# Enable detailed logging
+logging.basicConfig(level=logging.DEBUG)
 
 # List of channels to subscribe
 FSUB = [FSUB_1, FSUB_2]
@@ -45,18 +49,24 @@ app1 = ClientLike(
     plugins=dict(root='Plugins1')
 )
 
-# Function to test individual bots
-async def start_bot(bot):
+async def start_bot(bot, name):
     await bot.start()
     x = await bot.get_me()
-    print(f'@{x.username} started.')
+    print(f'@{x.username} ({name}) started.')
 
 async def start():
-    # Start the first bot
-    await start_bot(app)
-    # Start the second bot
-    await start_bot(app1)
-    await idle()
+    try:
+        # Start the first bot
+        await start_bot(app, "BOT_TOKEN")
+        await asyncio.sleep(5)  # Delay to ensure the first bot starts properly
+        
+        # Start the second bot
+        await start_bot(app1, "BOT_TOKEN_2")
+        
+        await idle()
+    except Exception as e:
+        logging.error(f"An error occurred: {e}")
+        sys.exit()
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
