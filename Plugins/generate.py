@@ -4,10 +4,10 @@ from pyrogram.errors import FloodWait
 from config import SUDO_USERS, DB_CHANNEL_ID, DB_CHANNEL_2_ID, LOG_CHANNEL_ID, LINK_GENERATE_IMAGE
 from Database.count import incr_count
 from Database.settings import get_settings
+from Database import tryer  # Correct import
 from .encode_decode import encrypt, Int2Char
 from .watchers import get_me
 from templates import LINK_GEN
-from Database import tryer
 import asyncio
 
 @Client.on_message(filters.command('gen') & filters.user(SUDO_USERS))
