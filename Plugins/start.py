@@ -220,4 +220,11 @@ async def start(client: Client, message: Message):
             if okkie:
                 await okkie.delete()
 
-# Initialize
+# Correct way to run the app within an async function
+async def main():
+    await app.start()
+    await app.idle()
+
+# Entry point for the script
+if __name__ == "__main__":
+    asyncio.run(main())
