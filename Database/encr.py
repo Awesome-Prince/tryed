@@ -19,9 +19,15 @@ async def get_all():
     return await db.find().to_list(None)
 
 def decrypt(text):
+    """Decrypt the text."""
     # Add your decryption logic here
     pass
 
 def Char2Int(char):
+    """Convert char to int."""
     # Add your char to int conversion logic here
     pass
+
+async def get_encr(encr):
+    """Get encrypted data based on encr value."""
+    return await get(encr)
