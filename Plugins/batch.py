@@ -8,7 +8,7 @@ from Database.count_2 import incr_count_2
 from Database.count import incr_count
 from Database.settings import get_settings
 from Database.encr import update
-from . import tryer
+from Database import tryer
 import asyncio
 
 dic = {}
