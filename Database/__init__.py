@@ -5,7 +5,8 @@ from pyrogram.types import (
     Message, InlineKeyboardButton as IKB, InlineKeyboardMarkup as IKM
 )
 from config import TUTORIAL_LINK, AUTO_DELETE_TIME
-from helpers import get_chats  # Import from new helpers module
+from helpers import get_chats
+from .db_module import db  # Ensure db is imported correctly
 
 # Function to handle FloodWait exceptions
 async def tryer(func, *args, **kwargs):
