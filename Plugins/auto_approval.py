@@ -1,5 +1,5 @@
 from pyrogram import Client, filters
-from config import FSUB
+from config import FSUB_1, FSUB_2
 from Database.settings import get_settings
 from .utils import tryer  # Assuming `tryer` function is defined in utils
 
