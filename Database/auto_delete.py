@@ -5,7 +5,7 @@ from config import AUTO_DELETE_TIME
 from main import app
 from .encr import decrypt, Char2Int, get_all, get, update
 from templates import POST_DELETE_TEXT
-from . import tryer
+from Database import tryer
 
 async def auto_delete_task():
     """
