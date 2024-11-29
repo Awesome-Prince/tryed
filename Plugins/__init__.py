@@ -5,9 +5,7 @@ from pyrogram.types import (
     Message, InlineKeyboardButton as IKB, InlineKeyboardMarkup as IKM
 )
 from config import TUTORIAL_LINK, AUTO_DELETE_TIME
-from helpers import get_chats  # Import from new helpers module
-
-# Remove tryer function from here
+from helpers import get_chats 
 
 # Function to convert seconds to human-readable format
 def grt(seconds: int) -> str:
