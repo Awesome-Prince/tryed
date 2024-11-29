@@ -45,41 +45,17 @@ app1 = ClientLike(
     plugins=dict(root='Plugins1')
 )
 
-async def start():
-    await app.start()
-    await app1.start()
-    ret = False
-
-    async def send_and_delete(client, channel_id, message):
-        try:
-            await client.rate_limit(channel_id, delay=0.5)  # Reduced delay for better performance
-            m = await client.send_message(channel_id, message)
-            await m.delete()
-        except Exception as e:
-            print(e)
-            return False
-        return True
-
-    tasks = [
-        send_and_delete(app, DB_CHANNEL_ID, '.'),
-        send_and_delete(app, DB_CHANNEL_2_ID, '.'),
-        send_and_delete(app, AUTO_SAVE_CHANNEL_ID, '.')
-    ]
-    if LOG_CHANNEL_ID:
-        tasks.append(send_and_delete(app, LOG_CHANNEL_ID, '.'))
-
-    for x in FSUB:
-        tasks.append(send_and_delete(app, x, '.'))
-        tasks.append(send_and_delete(app1, x, '.'))
-
-    results = await asyncio.gather(*tasks, return_exceptions=True)
-    if any(not result for result in results):
-        sys.exit()
-
-    x = await app.get_me()
-    y = await app1.get_me()
+# Function to test individual bots
+async def start_bot(bot):
+    await bot.start()
+    x = await bot.get_me()
     print(f'@{x.username} started.')
-    print(f'@{y.username} started.')
+
+async def start():
+    # Start the first bot
+    await start_bot(app)
+    # Start the second bot
+    await start_bot(app1)
     await idle()
 
 if __name__ == "__main__":
