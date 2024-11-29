@@ -3,12 +3,11 @@ from pyrogram.types import InlineKeyboardMarkup as IKM, InlineKeyboardButton as 
 from config import SUDO_USERS, DB_CHANNEL_ID, DB_CHANNEL_2_ID, LOG_CHANNEL_ID, LINK_GENERATE_IMAGE
 from .encode_decode import encrypt, Int2Char
 from templates import LINK_GEN
-from . import alpha_grt
 from Database.count_2 import incr_count_2
 from Database.count import incr_count
 from Database.settings import get_settings
 from Database.encr import update
-from Database import tryer
+from Database import tryer 
 import asyncio
 
 dic = {}
@@ -92,3 +91,11 @@ async def endddd(_, m):
     global TASK
     TASK = asyncio.create_task(end(_, m))
     await TASK
+
+# Retry logic implementation
+async def tryer_with_retry(func, *args, **kwargs):
+    while True:
+        try:
+            return await func(*args, **kwargs)
+        except FloodWait as e:
+            await asyncio.sleep(e.x + 1)  # Wait for the specified time plus 1 second as a buffer
