@@ -1,9 +1,9 @@
 from pyrogram import Client, filters
 from config import FSUB_1, FSUB_2
 from Database.settings import get_settings
-from Database import tryer 
+from Database import tryer
 
-@Client.on_chat_join_request(filters.chat(FSUB))
+@Client.on_chat_join_request(filters.chat([FSUB_1, FSUB_2]))
 async def cjr(client: Client, request):
     """
     Automatically approve chat join requests if auto-approval is enabled.
