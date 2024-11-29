@@ -5,7 +5,7 @@ from pyrogram.errors import FloodWait
 from Database.privileges import get_privileges, update_privileges
 from Database.subscription import get_all_subs, del_sub, active_sub
 from templates import SU_TEXT, EXPIRE_TEXT
-from Database import tryer  # Correct import
+from Database import tryer
 import datetime
 import asyncio
 import time
@@ -61,7 +61,7 @@ async def activate_cbq(_, q):
         
         expiry_date = datetime.datetime.now() + datetime.timedelta(seconds=exp)
         await tryer(_.send_photo, user_id, SU_IMAGE, caption=SU_TEXT.format((await _.get_users(user_id)).mention, 
-                                                                           f'{expiry_date.day}-{expiry_date.month}-{expiry_date.year}'), 
+                                                                           f'{expiry_date.day}-{expiry-date.month}-{expiry-date-year}'), 
                                                                            reply_markup=markup)
         await q.answer()
         await tryer(q.edit_message_text, 'Activated.', reply_markup=None)
