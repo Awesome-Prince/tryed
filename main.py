@@ -37,7 +37,7 @@ class ClientLike(Client):
         self.last_message_time[chat_id] = now
 
 # Initialize the bot clients
-app = ClientLike(
+app = Client(
     ':91:',
     api_id=API_ID,
     api_hash=API_HASH,
