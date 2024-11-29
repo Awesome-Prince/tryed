@@ -58,7 +58,7 @@ async def start():
     try:
         # Start the first bot
         await start_bot(app, "BOT_TOKEN")
-        await asyncio.sleep(5)  # Delay to ensure the first bot starts properly
+          # Delay to ensure the first bot starts properly
         
         # Start the second bot
         await start_bot(app1, "BOT_TOKEN_2")
