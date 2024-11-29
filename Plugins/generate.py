@@ -4,9 +4,9 @@ from pyrogram.errors import FloodWait
 from config import SUDO_USERS, DB_CHANNEL_ID, DB_CHANNEL_2_ID, LOG_CHANNEL_ID, LINK_GENERATE_IMAGE
 from Database.count import incr_count
 from Database.settings import get_settings
-from Database import tryer  # Correct import
+from Database import tryer
 from .encode_decode import encrypt, Int2Char
-from .watchers import get_me
+from .watchers import get_me, alpha_grt
 from templates import LINK_GEN
 import asyncio
 
