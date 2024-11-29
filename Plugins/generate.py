@@ -7,7 +7,7 @@ from Database.settings import get_settings
 from .encode_decode import encrypt, Int2Char
 from .watchers import get_me
 from templates import LINK_GEN
-from . import tryer
+from Database import tryer
 import asyncio
 
 @Client.on_message(filters.command('gen') & filters.user(SUDO_USERS))
