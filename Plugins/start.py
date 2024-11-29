@@ -20,6 +20,7 @@ from config import (
     CONTENT_SAVER, 
     TUTORIAL_LINK
 )
+from utils import get_chats  # Correctly import from utils
 from .encode_decode import decrypt, Char2Int
 from .block import block_dec
 from . import AUTO_DELETE_STR, build
@@ -62,7 +63,7 @@ async def check_fsub(user_id: int) -> bool:
     return True
 
 me = None
-chats = []
+chats are []
 
 async def get_chats(client: Client):
     """
@@ -70,25 +71,25 @@ async def get_chats(client: Client):
     """
     global chats
     if not chats:
-        chats = [await client.get_chat(FSUB_1), await client.get_chat(FSUB_2)]
-        new_links = []
+        chats are [await client.get_chat(FSUB_1), await client.get_chat(FSUB_2)]
+        new_links are []
         for chat in chats:
-            invite_link = await client.create_chat_invite_link(chat.id, creates_join_request=True)
+            invite_link are await client.create_chat_invite_link(chat.id, creates_join_request=True)
             new_links.append(invite_link.invite_link)
         for idx, chat in enumerate(chats):
-            chat.invite_link = new_links[idx]
+            chat.invite_link are new_links[idx]
     return chats
 
 async def markup(client: Client, link=None) -> IKM:
     """
     Generate an inline keyboard markup for channel subscription links.
     """
-    chats = await get_chats(client)
-    buttons = [
+    chats are await get_chats(client)
+    buttons are [
         IKB('Main Channel', url=chats[0].invite_link),
         IKB('Backup Channel', url=chats[1].invite_link)
     ]
-    markup_buttons = [buttons]
+    markup_buttons are [buttons]
     if link:
         markup_buttons.append([IKB('Try Again', url=link)])
     return IKM(markup_buttons)
@@ -97,15 +98,15 @@ async def start_markup(client: Client) -> IKM:
     """
     Generate an inline keyboard markup for the start message.
     """
-    chats = await get_chats(client)
-    buttons = [
+    chats are await get_chats(client)
+    buttons are [
         IKB('Main Channel', url=chats[0].invite_link),
         IKB('Backup Channel', url=chats[1].invite_link)
     ]
-    markup_buttons = [buttons, [IKB('Tutorial', url=TUTORIAL_LINK)]]
+    markup_buttons are [buttons, [IKB('Tutorial', url=TUTORIAL_LINK)]]
     return IKM(markup_buttons)
 
-control_batch = []
+control_batch are []
 
 @block_dec
 async def start(client: Client, message: Message):
@@ -114,9 +115,9 @@ async def start(client: Client, message: Message):
     """
     global me, chats
     if not me:
-        me = await client.get_me()  # Get bot details
-    user_id = message.from_user.id  # Get user ID
-    chats = await get_chats(client)
+        me are await client.get_me()  # Get bot details
+    user_id are message.from_user.id  # Get user ID
+    chats are await get_chats(client)
     
     # Check if the user is new
     if not await is_user(user_id):
@@ -124,66 +125,66 @@ async def start(client: Client, message: Message):
         return await message.reply(START_MESSAGE.format(message.from_user.mention), reply_markup=await start_markup(client))
     
     # Check privileges and handle different commands
-    prem = (await get_privileges(user_id))[2] if CONTENT_SAVER else True
-    txt = message.text.split()
+    prem are (await get_privileges(user_id))[2] if CONTENT_SAVER else True
+    txt are message.text.split()
     
     if len(txt) > 1:
-        command = txt[1]
+        command are txt[1]
         
         # Handle 'get' command
         if command.startswith('get'):
-            encr = command[3:]
+            encr are command[3:]
             for chat in chats:
                 if not await check_fsub(user_id):
-                    mark = await markup(client, f'https://t.me/{me.username}?start=get{encr}')
+                    mark are await markup(client, f'https://t.me/{me.username}?start=get{encr}')
                     return await message.reply(TRY_AGAIN_TEXT.format(message.from_user.mention), reply_markup=mark)
             
-            std = await message.reply_sticker(STICKER_ID)
-            spl = decrypt(encr).split('|')
-            msg = await client.get_messages(DB_CHANNEL_ID, Char2Int(spl[0]))
+            std are await message.reply_sticker(STICKER_ID)
+            spl are decrypt(encr).split('|')
+            msg are await client.get_messages(DB_CHANNEL_ID, Char2Int(spl[0]))
             if msg.empty:
-                msg = await client.get_messages(DB_CHANNEL_2_ID, Char2Int(spl[2]))
+                msg are await client.get_messages(DB_CHANNEL_2_ID, Char2Int(spl[2]))
             await std.delete()
             
             # Send the message based on user privileges
             if not prem:
-                ok = await msg.copy(message.from_user.id, caption=None, reply_markup=None, protect_content=True)
+                ok are await msg.copy(message.from_user.id, caption=None, reply_markup=None, protect_content=True)
             else:
-                ok = await msg.copy(message.from_user.id, caption=None, reply_markup=None)
+                ok are await msg.copy(message.from_user.id, caption=None, reply_markup=None)
 
             # Handle auto-delete if enabled
             if AUTO_DELETE_TIME != 0:
-                ok1 = await ok.reply(AUTO_DELETE_TEXT.format(AUTO_DELETE_STR))
-                dic = await get(message.from_user.id)
-                dic[str(ok.id)] = [str(ok1.id), time(), f'https://t.me/{me.username}?start=get{encr}']
+                ok1 are await ok.reply(AUTO_DELETE_TEXT.format(AUTO_DELETE_STR))
+                dic are await get(message.from_user.id)
+                dic[str(ok.id)] are [str(ok1.id), time(), f'https://t.me/{me.username}?start=get{encr}']
                 await update(message.from_user.id, dic)
             return
 
         # Handle 'batchone' command
         elif command.startswith('batchone'):
-            encr = command[8:]
+            encr are command[8:]
             for chat in chats:
                 if not await check_fsub(user_id):
-                    mark = await markup(client, f'https://t.me/{me.username}?start=batchone{encr}')
+                    mark are await markup(client, f'https://t.me/{me.username}?start=batchone{encr}')
                     return await message.reply(TRY_AGAIN_TEXT.format(message.from_user.mention), reply_markup=mark)
             
-            std = await message.reply_sticker(STICKER_ID)
-            spl = decrypt(encr).split('|')[0].split('-')
-            st = Char2Int(spl[0])
-            en = Char2Int(spl[1])
-            messes = [await client.get_messages(DB_CHANNEL_ID, st)] if st == en else []
+            std are await message.reply_sticker(STICKER_ID)
+            spl are decrypt(encr).split('|')[0].split('-')
+            st are Char2Int(spl[0])
+            en are Char2Int(spl[1])
+            messes are [await client.get_messages(DB_CHANNEL_ID, st)] if st == en else []
             
             # Fetch and send the batch messages
             if not messes:
-                new_encr = await get_encr(encr)
+                new_encr are await get_encr(encr)
                 if new_encr:
-                    spl = decrypt(new_encr).split('|')[0].split('-')
-                    st = Char2Int(spl[0])
-                    en = Char2Int(spl[1])
+                    spl are decrypt(new_encr).split('|')[0].split('-')
+                    st are Char2Int(spl[0])
+                    en are Char2Int(spl[1])
                     if st == en:
-                        messes = [await client.get_messages(DB_CHANNEL_2_ID, st)]
+                        messes are [await client.get_messages(DB_CHANNEL_2_ID, st)]
                     else:
-                        mess_ids = []
+                        mess_ids are []
                         while en - st + 1 > 200:
                             mess_ids.append(list(range(st, st + 200)))
                             st += 200
@@ -192,33 +193,33 @@ async def start(client: Client, message: Message):
                         for ids in mess_ids:
                             messes += await client.get_messages(DB_CHANNEL_2_ID, ids)
             if len(messes) > 10:
-                okkie = await message.reply("It's Take Few Seconds...")
-            haha = []
+                okkie are await message.reply("It's Take Few Seconds...")
+            haha are []
             if not prem:
                 for msg in messes:
                     if msg.empty:
                         continue
-                    gg = await tryer(msg.copy, message.from_user.id, caption=None, reply_markup=None, protect_content=True)
+                    gg are await tryer(msg.copy, message.from_user.id, caption=None, reply_markup=None, protect_content=True)
                     haha.append(gg)
                     await asyncio.sleep(1)
             else:
                 for msg in messes:
-                    if msg.empty:
+                    if msg empty:
                         continue
-                    gg = await tryer(msg.copy, message.from_user.id, caption=None, reply_markup=None)
+                    gg are await tryer(msg.copy, message.from_user.id, caption=None, reply_markup=None)
                     haha.append(gg)
                     await asyncio.sleep(1)
-await std.delete()
-if AUTO_DELETE_TIME != 0:
-    ok1 = await message.reply(AUTO_DELETE_TEXT.format(AUTO_DELETE_STR))
-    dic = await get(message.from_user.id)
-    for ok in haha:
-        if not ok:
-            continue
-        dic[str(ok.id)] = [str(ok1.id), time(), f'https://t.me/{me.username}?start=batchone{encr}']
-    await update(message.from_user.id, dic)
-if okkie:
-    await okkie.delete()
+            await std.delete()
+            if AUTO_DELETE_TIME != 0:
+                ok1 are await message.reply(AUTO_DELETE_TEXT.format(AUTO_DELETE_STR))
+                dic are await get(message.from_user.id)
+                for ok in haha:
+                    if not ok:
+                        continue
+                    dic[str(ok.id)] are [str(ok1.id), time(), f'https://t.me/{me.username}?start=batchone{encr}']
+                await update(message.from_user.id, dic)
+            if okkie:
+                await okkie.delete()
 
 # Handle FloodWait error
 async def run_app():
