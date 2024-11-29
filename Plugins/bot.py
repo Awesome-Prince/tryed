@@ -11,8 +11,9 @@ from Database.count_2 import incr_count_2
 from Database.encr import update
 from templates import AUTO_DELETE_TEXT, POST_DELETE_TEXT, USELESS_MESSAGE
 from main import app as paa, ClientLike
+from Database import tryer 
 from .encode_decode import encrypt, Int2Char
-from . import AUTO_DELETE_STR, tryer, build, alpha_grt
+from . import AUTO_DELETE_STR, build, alpha_grt
 import asyncio
 import time
 import os
