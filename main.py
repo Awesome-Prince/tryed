@@ -7,7 +7,11 @@ import asyncio
 from time import time
 
 # Enable detailed logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.FileHandler("log.txt"), logging.StreamHandler()],
+    level=logging.INFO,
+)
 
 # List of channels to subscribe
 FSUB = [FSUB_1, FSUB_2]
@@ -49,6 +53,8 @@ app1 = ClientLike(
     plugins=dict(root='Plugins1')
 )
 
+loop = asyncio.get_event_loop()
+
 async def start_bot(bot, name):
     await bot.start()
     x = await bot.get_me()
@@ -68,6 +74,5 @@ async def start():
         logging.error(f"An error occurred: {e}")
         sys.exit()
 
-if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
+if __name__ == "__main__":    
     loop.run_until_complete(start())
