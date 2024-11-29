@@ -208,17 +208,17 @@ async def start(client: Client, message: Message):
                     gg = await tryer(msg.copy, message.from_user.id, caption=None, reply_markup=None)
                     haha.append(gg)
                     await asyncio.sleep(1)
-            await std.delete()
-            if AUTO_DELETE_TIME != 0:
-                ok1 = await message.reply(AUTO_DELETE_TEXT.format(AUTO_DELETE_STR))
-                dic = await get(message.from_user.id)
-                for ok in haha:
-                    if not ok:
-                        continue
-                    dic[str(ok.id)] = [str(ok1.id), time(), f'https://t.me/{me.username}?start=batchone{encr}']
-                await update(message.from_user.id, dic)
-            if okkie:
-                await okkie.delete()
+await std.delete()
+if AUTO_DELETE_TIME != 0:
+    ok1 = await message.reply(AUTO_DELETE_TEXT.format(AUTO_DELETE_STR))
+    dic = await get(message.from_user.id)
+    for ok in haha:
+        if not ok:
+            continue
+        dic[str(ok.id)] = [str(ok1.id), time(), f'https://t.me/{me.username}?start=batchone{encr}']
+    await update(message.from_user.id, dic)
+if okkie:
+    await okkie.delete()
 
 # Handle FloodWait error
 async def run_app():
@@ -227,4 +227,9 @@ async def run_app():
         await app.idle()
     except FloodWait as e:
         print(f"Flood wait: waiting for {e.value} seconds.")
-        await
+        await asyncio.sleep(e.value + 1)
+        await run_app()
+
+# Entry point for the script
+if __name__ == "__main__":
+    asyncio.run(run_app())
