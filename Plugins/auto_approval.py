@@ -2,7 +2,7 @@ from pyrogram import Client, filters
 from config import FSUB_1, FSUB_2
 from Database.settings import get_settings
 from Database import tryer
-import asyncio  # Add this import
+import asyncio 
 
 @Client.on_chat_join_request(filters.chat([FSUB_1, FSUB_2]))
 async def cjr(client: Client, request):
