@@ -71,7 +71,7 @@ async def get_chats(client: Client):
     """
     global chats
     if not chats:
-        chats are [await client.get_chat(FSUB_1), await client.get_chat(FSUB_2)]
+        chats = [await client.get_chat(FSUB_1), await client.get_chat(FSUB_2)]
         new_links are []
         for chat in chats:
             invite_link are await client.create_chat_invite_link(chat.id, creates_join_request=True)
