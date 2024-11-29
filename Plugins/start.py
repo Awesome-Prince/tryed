@@ -220,11 +220,10 @@ async def start(client: Client, message: Message):
             if okkie:
                 await okkie.delete()
 
-# Correct way to run the app within an async function
-async def main():
-    await app.start()
-    await app.idle()
-
-# Entry point for the script
-if __name__ == "__main__":
-    asyncio.run(main())
+# Handle FloodWait error
+async def run_app():
+    try:
+        await app.start()
+        await app.idle()
+    except FloodWait as e:
+        print(f"
