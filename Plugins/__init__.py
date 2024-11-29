@@ -58,4 +58,4 @@ async def build(_):
     return markup
 
 # Exporting necessary variables and functions
-__all__ = ['AUTO_DELETE_STR', 'tryer', 'build']
+__all__ = ['AUTO_DELETE_STR', 'build']
