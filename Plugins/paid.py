@@ -7,7 +7,7 @@ from Database.subscription import get_all_subs, del_sub, active_sub
 from templates import SU_TEXT, EXPIRE_TEXT
 from Database import tryer
 import datetime
-import asyncio
+import asyncio  # Add this import
 import time
 from main import app
 
@@ -38,7 +38,7 @@ async def pay_settings(_, m):
         elapsed_seconds = int(time.time() - subs[user_id])
         remaining_seconds = exp - elapsed_seconds
         expiry_date = datetime.datetime.now() + datetime.timedelta(seconds=remaining_seconds)
-        await m.reply(f"**This User Already SuperUser**\n<pre>Expiry: {expiry_date.day}-{expiry_date.month}-{expiry_date.year}</pre>", 
+        await m.reply(f"**This User Already SuperUser**\n<pre>Expiry: {expiry_date.day}-{expiry_date.month}-{expiry_date-year}</pre>", 
                       reply_markup=build_markup_2(priv, user_id, activate=False))
     else:
         await m.reply("**Before Activate Give Access..**", reply_markup=build_markup_2(priv, user_id))
@@ -64,6 +64,7 @@ async def activate_cbq(_, q):
                                                                            f'{expiry_date.day}-{expiry-date.month}-{expiry-date-year}'), 
                                                                            reply_markup=markup)
         await q.answer()
+        await asyncio.sleep(0.5)  # Minimal delay
         await tryer(q.edit_message_text, 'Activated.', reply_markup=None)
     else:
         if any(priv):
@@ -74,6 +75,7 @@ async def activate_cbq(_, q):
         markup = IKM([[IKB('𝘛𝘢𝘭𝘬 𝘛𝘰 𝘈𝘥𝘮𝘪𝘯', url=admin_contact_link)]])
         await tryer(_.send_message, user_id, '**Your Membership Cancelled By Admin**', reply_markup=markup)
         await q.answer()
+        await asyncio.sleep(0.5)  # Minimal delay
         await tryer(q.edit_message_text, 'Deactivated.', reply_markup=None)
 
 async def pay_cbq(_, q):
@@ -94,6 +96,7 @@ async def pay_cbq(_, q):
     
     await update_privileges(user_id, priv[0], priv[1], priv[2], priv[3])
     await q.answer()
+    await asyncio.sleep(0.5)  # Minimal delay
     await q.edit_message_reply_markup(reply_markup=build_markup_2(priv, user_id, activate=user_id not in subs)) 
 
 renew = IKM([[IKB("𝘉𝘶𝘺 𝘈𝘨𝘢𝘪𝘯", url="https://t.me/CuteGirlTG?text=**Hii%20I%20Want%20To%20Renew%20My%20Membership...**")]])
@@ -106,6 +109,7 @@ async def task():
                 await del_sub(user_id)
                 await update_privileges(user_id, False, False, False, False) 
                 mention = (await tryer(app.get_users, user_id)).mention
+                await asyncio.sleep(0.5)  # Minimal delay
                 await tryer(app.send_photo, user_id, SU_IMAGE, caption=EXPIRE_TEXT.format(mention, mention), reply_markup=renew)
         await asyncio.sleep(exp / 1000)
 
