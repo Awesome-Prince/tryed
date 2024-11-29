@@ -63,7 +63,7 @@ async def check_fsub(user_id: int) -> bool:
     return True
 
 me = None
-chats are []
+chats = []
 
 async def get_chats(client: Client):
     """
