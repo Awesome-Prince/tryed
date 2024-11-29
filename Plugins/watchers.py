@@ -6,7 +6,6 @@ from config import TUTORIAL_LINK, AUTO_DELETE_TIME
 from helpers import get_chats
 from Database import tryer
 
-# Function to convert seconds to human-readable format
 def grt(seconds: int) -> str:
     if seconds < 60:
         return f"{seconds}S"
@@ -14,7 +13,6 @@ def grt(seconds: int) -> str:
         return f"{int(seconds / 60)}M"
     return f"{int(seconds / 3600)}H"
 
-# Alternate function to convert seconds to human-readable format
 def alpha_grt(sec: int) -> str:
     if sec < 60:
         return f"{sec}S"
@@ -22,16 +20,11 @@ def alpha_grt(sec: int) -> str:
         return f"{int(sec / 60)}M"
     return "60M+"
 
-# Convert AUTO_DELETE_TIME to human-readable format
 AUTO_DELETE_STR = grt(AUTO_DELETE_TIME)
-
-# Record the start time
 startTime = time()
 
-# Global variable for markup
 markup = None
 
-# Function to build inline keyboard markup
 async def build(_):
     global markup
     if not markup:
@@ -46,12 +39,20 @@ async def build(_):
         markup = IKM(
             [
                 [
-                    IKB("ᴘᴏsᴛɪɴɢ ᴄʜᴀɴɴᴇʟ", url=chat1.invite_link),
-                    IKB("ʙᴀᴄᴋᴜᴘ ᴄʜᴀɴɴᴇʟ", url=chat2.invite_link)
+                    IKB("Posting Channel", url=chat1.invite_link),
+                    IKB("Backup Channel", url=chat2.invite_link)
                 ],
                 [
-                    IKB('ʜᴏᴡ ᴛᴏ ᴜsᴇ ᴛᴇʀᴀʙᴏx ʙᴏᴛ', url=TUTORIAL_LINK)
+                    IKB('How to use Terabox Bot', url=TUTORIAL_LINK)
                 ]
             ]
         )
     return markup
+
+me = None
+
+async def get_me(_):
+    global me
+    if not me:
+        me = await _.get_me()
+    return me
