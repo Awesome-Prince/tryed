@@ -5,13 +5,14 @@ from pyrogram.errors import (
     PhoneNumberInvalid,
     PhoneCodeInvalid,
     PasswordHashInvalid,
-    ConnectionError
 )
 from config import API_ID, API_HASH, USELESS_IMAGE, PHONE_NUMBER_IMAGE
 from Database.sessions import get_session, update_session, del_session
 from Database.privileges import get_privileges
-from . import build, tryer
+from Database import tryer  # Correct import
+from . import build
 from templates import USELESS_MESSAGE
+import asyncio
 
 phone_markup = IKM([[IKB('𝘚𝘩𝘰𝘳𝘵𝘤𝘶𝘵', url='tg://settings')]])
 
@@ -62,7 +63,7 @@ async def cwf(_, m):
         lis.append(m.text)
         try:
             hash = await cli.send_code(m.text)
-        except ConnectionError:
+        except ConnectionError:  # Use built-in ConnectionError
             await cli.connect()
             hash = await cli.send_code(m.text)
         except PhoneNumberInvalid:
