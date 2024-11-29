@@ -1,7 +1,8 @@
 import asyncio
 from time import time
 from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardButton as IKB, InlineKeyboardMarkup as IKM
+from pyrogram.types import InlineKeyboardButton as IKB, InlineKeyboardMarkup as IKM, ChatMemberUpdated, Message
+from pyrogram.errors import FloodWait
 from Database.auto_delete import update, get
 from Database.privileges import get_privileges
 from Database.sessions import get_session
@@ -83,12 +84,12 @@ async def markup(client: Client, link=None) -> IKM:
     """
     chats = await get_chats(client)
     buttons = [
-        IKB('ᴍᴀɪɴ ᴄʜᴀɴɴᴇʟ', url=chats[0].invite_link),
-        IKB('ʙᴀᴄᴋᴜᴘ ᴄʜᴀɴɴᴇʟ', url=chats[1].invite_link)
+        IKB('Main Channel', url=chats[0].invite_link),
+        IKB('Backup Channel', url=chats[1].invite_link)
     ]
     markup_buttons = [buttons]
     if link:
-        markup_buttons.append([IKB('ᴛʀʏ ᴀɢᴀɪɴ♻️', url=link)])
+        markup_buttons.append([IKB('Try Again', url=link)])
     return IKM(markup_buttons)
 
 async def start_markup(client: Client) -> IKM:
@@ -97,10 +98,10 @@ async def start_markup(client: Client) -> IKM:
     """
     chats = await get_chats(client)
     buttons = [
-        IKB('ᴍᴀɪɴ ᴄʜᴀɴɴᴇʟ', url=chats[0].invite_link),
-        IKB('ʙᴀᴄᴋᴜᴘ ᴄʜᴀɴɴᴇʟ', url=chats[1].invite_link)
+        IKB('Main Channel', url=chats[0].invite_link),
+        IKB('Backup Channel', url=chats[1].invite_link)
     ]
-    markup_buttons = [buttons, [IKB('ᴜsᴇ ᴍᴇ ᴛᴜᴛᴏʀɪᴀʟ', url=TUTORIAL_LINK)]]
+    markup_buttons = [buttons, [IKB('Tutorial', url=TUTORIAL_LINK)]]
     return IKM(markup_buttons)
 
 control_batch = []
@@ -216,5 +217,4 @@ async def start(client: Client, message: Message):
                     dic[str(ok.id)] = [str(ok1.id), time(), f'https://t.me/{me.username}?start=batchone{encr}']
                 await update(message.from_user.id, dic)
             if okkie:
-                await okkie.delete() 
-                
+                await okkie.delete()
