@@ -1,6 +1,6 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 
-# Example MongoDB connection setup
+# MongoDB connection setup
 client = AsyncIOMotorClient('mongodb://localhost:27017')
 db = client.mydatabase  # Adjust as per your database configuration
 
