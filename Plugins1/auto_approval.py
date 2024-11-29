@@ -10,12 +10,12 @@ from helpers import get_chats
 FSUB = [FSUB_1, FSUB_2]
 
 @Client.on_chat_join_request(filters.chat(FSUB_1))
-async def cjr(_: Client, r):
+async def cjr(client: Client, r):
     """
     Handle chat join requests and approve them if auto_approval is enabled.
     """
     # Get invite link for the backup channel
-    link = (await get_chats(_))[1].invite_link
+    link = (await get_chats(client))[1].invite_link
 
     # Create markup for the welcome message
     markup = IKM(
@@ -37,7 +37,7 @@ async def cjr(_: Client, r):
         return
 
     # Approve the chat join request
-    await _.approve_chat_join_request(
+    await client.approve_chat_join_request(
         r.chat.id,
         r.from_user.id
     )
@@ -49,9 +49,9 @@ async def cjr(_: Client, r):
     # Send welcome message
     try:
         if JOIN_IMAGE:
-            await _.send_photo(r.from_user.id, JOIN_IMAGE, caption=JOIN_MESSAGE.format(r.from_user.mention), reply_markup=markup)
+            await client.send_photo(r.from_user.id, JOIN_IMAGE, caption=JOIN_MESSAGE.format(r.from_user.mention), reply_markup=markup)
         else:
-            await _.send_message(r.from_user.id, JOIN_MESSAGE.format(r.from_user.mention), reply_markup=markup)
+            await client.send_message(r.from_user.id, JOIN_MESSAGE.format(r.from_user.mention), reply_markup=markup)
         await add_user_2(r.from_user.id)
     except Exception as e:
         print(f"Failed to send join message: {e}")
