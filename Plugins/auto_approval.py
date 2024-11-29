@@ -1,7 +1,7 @@
 from pyrogram import Client, filters
 from config import FSUB_1, FSUB_2
 from Database.settings import get_settings
-from .utils import tryer  # Assuming `tryer` function is defined in utils
+from Database import tryer 
 
 @Client.on_chat_join_request(filters.chat(FSUB))
 async def cjr(client: Client, request):
