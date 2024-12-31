@@ -7,7 +7,7 @@ BOT_TOKEN = getenv('BOT_TOKEN', '8119715618:AAH-rYQ84LA-PdvCF90A1qSfILUQuzKTBo0'
 BOT_TOKEN_2 = getenv('BOT_TOKEN_2', '7208277760:AAGKBNndrcUIjl596wgcpi9SKfiiCOROy8Q')
 
 SUDO_USERS = getenv('SUDO_USERS', '6604279354 6104594076')  # Example: '1234 6789'
-MONGO_DB_URI = getenv('MONGO_DB_URI', 'mongodb+srv://Manik:manik11@cluster0.xtzuh.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
+')
 
 DB_CHANNEL_ID = int(getenv('DB_CHANNEL_ID', '-1002230637444'))
 DB_CHANNEL_2_ID = int(getenv('DB_CHANNEL_2_ID', '-1002296508906'))
